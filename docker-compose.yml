@@ -1,0 +1,6 @@
+version: '2'
+services:
+  mollybot:
+    build: ./
+    container_name: mollybot
+    restart: unless-stopped
