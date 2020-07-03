@@ -12,8 +12,10 @@ const bot = new Discord.Client();
 
 bot.login(TOKEN);
 
+// bot.commands.set()
+
 bot.on('ready', async () => {
-  console.info(`Logged in as ${bot.user.tag}!`);
+  console.info(`Logged in as ${bot.user!.tag}!`);
 });
 
 bot.on('message', async msg => {
@@ -21,4 +23,18 @@ bot.on('message', async msg => {
     const deepDiveInfo = await drg.getDeepDives();
     msg.channel.send(deepDiveInfo);
   }
+  if (msg.content.match(/!about/is)) {
+    msg.channel.send('BEEP BOOP BRRRP\n');
+  }
+
+  if (msg.mentions.users.size) {
+  }
+
+  // if (msg.content.startsWith('!kick')) {
+  // if (msg.mentions.users.size) {
+  //   const taggedUser = msg.mentions.users.first();
+  //   msg.channel.send(`You wanted to kick: ${taggedUser.username}`);
+  // } else {
+  //   msg.reply('Please tag a valid user!');
+  // }
 });

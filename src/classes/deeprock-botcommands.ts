@@ -19,7 +19,7 @@ export class DeepRockBotCommands {
   /**
    * Resolve weekly deep dives information thread from the /r/deeprockgalactic subreddit.
    */
-  public getDeepDives(): Promise<Discord.RichEmbed> {
+  public getDeepDives(): Promise<Discord.MessageEmbed> {
     return new Promise(async resolve => {
       const response = await fetch('https://www.reddit.com/r/DeepRockGalactic/hot/.json?limit=0');
       const responseBody = await response.json();
@@ -38,7 +38,7 @@ export class DeepRockBotCommands {
    * as an embed.
    * @param postObject Reddit thread object
    */
-  private composeDeepDiveEmbed(rawPost: IRedditThread): Discord.RichEmbed {
+  private composeDeepDiveEmbed(rawPost: IRedditThread): Discord.MessageEmbed {
     const regex = new RegExp(/\*{2}Deep Dive\*{2}(.*)\*{2}Elite Deep Dive\*{2}/is);
     let details = rawPost.selftext.match(regex);
 
@@ -63,7 +63,7 @@ export class DeepRockBotCommands {
       return moment(now).fromNow();
     };
 
-    return new Discord.RichEmbed()
+    return new Discord.MessageEmbed()
       .setColor('#cb6e00')
       .setTitle('Weekly Deep Dive')
       .setURL(rawPost.url)
