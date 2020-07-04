@@ -3,4 +3,4 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY . .
 RUN npm install && npm run build
-CMD [ "node", "/usr/src/app/dist/bot.js" ]
+CMD [ "npm", "run", "deploy" ]
