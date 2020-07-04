@@ -1,40 +1,76 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-
-import {DeepRockBotCommands} from './classes/deeprock-botcommands';
-
-const drg = new DeepRockBotCommands();
+import * as fs from 'fs';
 
 dotenv.config();
 
-const TOKEN = process.env.TOKEN;
-const bot = new Discord.Client();
+/**
+ * Set up environment info and bot configuration
+ */
+let env: EnvironmentInfo = {
+  mode: 'Development',
+  commandsFolder: './src',
+  commandFileRegex: /\.(js|ts)$/,
+  token: process.env.TOKEN!,
+  prefix: process.env.PREFIX!,
+};
 
-bot.login(TOKEN);
+if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
+  env = {...env, mode: 'Production', commandsFolder: './dist', commandFileRegex: /\.(js)$/};
+}
 
-// bot.commands.set()
+/**
+ * Create the bot client and parse command files
+ */
+const bot: DiscordBotExtended = new Discord.Client();
+bot.commands = new Discord.Collection();
+
+const commandFiles = fs
+  .readdirSync(`${env.commandsFolder}/commands`)
+  .filter(file => file.match(env.commandFileRegex));
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  bot.commands.set(command.name, command);
+}
 
 bot.on('ready', async () => {
-  console.info(`Logged in as ${bot.user!.tag}!`);
+  console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
+
+  let availableCommands = 'Available Commands: ';
+  bot.commands!.forEach(c => (availableCommands += `${env.prefix}${c.name} `));
+  console.info(availableCommands);
 });
 
-bot.on('message', async msg => {
-  if (msg.content.match(/!deepdive[s]?/is)) {
-    const deepDiveInfo = await drg.getDeepDives();
-    msg.channel.send(deepDiveInfo);
-  }
-  if (msg.content.match(/!about/is)) {
-    msg.channel.send('BEEP BOOP BRRRP\n');
-  }
+bot.on('message', async message => {
+  if (!message.content.startsWith(env.prefix) || message.author.bot) return;
 
-  if (msg.mentions.users.size) {
-  }
+  const args = message.content.slice(env.prefix.length).split(/ +/);
+  const command = args.shift()!.toLowerCase();
 
-  // if (msg.content.startsWith('!kick')) {
-  // if (msg.mentions.users.size) {
-  //   const taggedUser = msg.mentions.users.first();
-  //   msg.channel.send(`You wanted to kick: ${taggedUser.username}`);
-  // } else {
-  //   msg.reply('Please tag a valid user!');
-  // }
+  try {
+    bot.commands!.get(command)!.execute(message, args);
+  } catch (error) {
+    message.reply('Bweee wooo <:sadMoops:728756268474302536>');
+  }
 });
+
+bot.login(env.token);
+
+interface DiscordBotExtended extends Discord.Client {
+  commands?: Discord.Collection<string, CollectionFunction>;
+}
+
+interface CollectionFunction {
+  name: string;
+  description?: string;
+  execute(message: Discord.Message, ags: any): any;
+}
+
+interface EnvironmentInfo {
+  mode: string;
+  commandsFolder: string;
+  commandFileRegex: RegExp;
+  token: string;
+  prefix: string;
+}
