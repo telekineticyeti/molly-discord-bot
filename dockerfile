@@ -3,4 +3,4 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY . .
 RUN npm install && npm run build
-CMD [ "npm", "run", "deploy" ]
+CMD [ "npm", "run", "deploy:start" ]

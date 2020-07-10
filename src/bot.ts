@@ -12,7 +12,7 @@ let env: EnvironmentInfo = {
   commandsFolder: './src',
   commandFileRegex: /\.(js|ts)$/,
   token: process.env.TOKEN!,
-  prefix: process.env.PREFIX!,
+  prefix: process.env.PREFIX || '!',
 };
 
 if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
@@ -44,9 +44,11 @@ bot.on('message', message => {
   const args = message.content.slice(env.prefix.length).split(/ +/);
   const commandName = args.shift()!.toLowerCase();
 
-  if (!bot.commands || !bot.commands.has(commandName)) return;
+  if (!bot.commands) return;
 
-  const command = bot.commands.get(commandName);
+  const command =
+    bot.commands.get(commandName) ||
+    bot.commands.find(cmd => cmd.aliases! && cmd.aliases!.includes(commandName));
 
   if (!command) return;
 
