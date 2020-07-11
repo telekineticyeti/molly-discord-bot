@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import * as fs from 'fs';
+import {walkFiles} from './classes/utlities.class';
 
 dotenv.config();
 
@@ -25,12 +25,13 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
 const bot: DiscordBotCommandExtension = new Discord.Client();
 bot.commands = new Discord.Collection();
 
-const commandFiles = fs
-  .readdirSync(`${env.commandsFolder}/commands`)
-  .filter(file => file.match(env.commandFileRegex));
+const commandFiles = walkFiles(`${env.commandsFolder}/commands`).filter(file =>
+  file.match(env.commandFileRegex),
+);
 
-for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
+for (let file of commandFiles) {
+  file = file.replace(env.commandsFolder, './');
+  const command = require(file);
   bot.commands.set(command.name, command);
 }
 
@@ -79,5 +80,6 @@ export interface DiscordBotCommand {
   cooldown?: number;
   aliases?: string[];
   usage?: string;
+  args?: boolean;
   execute(message: Discord.Message, ags: any): any;
 }
