@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
-import {DiscordBotCommand} from '../bot';
 import {FlightRising} from '../classes/fllght-rising.class';
+import {DiscordBotCommand} from 'typings/discord.js';
 
 const fr = new FlightRising();
 

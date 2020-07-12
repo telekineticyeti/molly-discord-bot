@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
-    "start": "NODE_ENV=Dev node --inspect=5858 -r ts-node/register ./src/bot.ts",
-    "start:watch": "NODE_ENV=Dev nodemon",
+    "start": "NODE_ENV=Dev ts-node --files ./src/bot.ts",
+    "watch": "NODE_ENV=Dev nodemon",
     "build": "rm -rf ./dist && tsc",
     "deploy": "npm run build && npm run deploy:start",
     "deploy:start": "NODE_ENV=Production node ./dist/bot.js"
@@ -16,13 +16,14 @@
     "@types/cheerio": "^0.22.21",
     "@types/dotenv": "^8.2.0",
     "@types/node": "^13.13.12",
+    "@types/node-cron": "^2.0.3",
     "@types/node-fetch": "^2.5.7",
     "@types/ramda": "^0.27.6",
     "@types/ws": "^7.2.6",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
     "tslint": "^6.1.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
@@ -31,6 +32,7 @@
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "moment": "^2.27.0",
+    "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
     "ytdl-core": "^3.1.2"
   }

@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
-import {DiscordBotCommand} from '../bot';
 import {DiscordYoutube} from '../classes/youtube.class';
+import {DiscordBotCommand} from 'typings/discord.js';
 
 const yt = new DiscordYoutube();
 

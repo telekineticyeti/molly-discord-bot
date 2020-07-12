@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
-import {DiscordBotCommand} from '../bot';
 import * as Canvas from 'canvas';
+import {DiscordBotCommand} from 'typings/discord.js';
 
 const pipLocations: IPipCoords = {
   1: [[75, 75, 8, 0]],

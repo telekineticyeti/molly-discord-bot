@@ -22,7 +22,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
 /**
  * Create the bot client and parse command files
  */
-const bot: DiscordBotCommandExtension = new Discord.Client();
+const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
 const commandFiles = walkFiles(`${env.commandsFolder}/commands`).filter(file =>
@@ -38,6 +38,7 @@ for (let file of commandFiles) {
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
+  // schedule();
 });
 
 bot.on('message', message => {
@@ -63,10 +64,6 @@ bot.on('message', message => {
 
 bot.login(env.token);
 
-export interface DiscordBotCommandExtension extends Discord.Client {
-  commands?: Discord.Collection<string, DiscordBotCommand>;
-}
-
 interface EnvironmentInfo {
   mode: string;
   commandsFolder: string;
@@ -75,12 +72,25 @@ interface EnvironmentInfo {
   prefix: string;
 }
 
-export interface DiscordBotCommand {
-  name: string;
-  description?: string;
-  cooldown?: number;
-  aliases?: string[];
-  usage?: string;
-  args?: boolean;
-  execute(message: Discord.Message, ags: any): any;
-}
+// const schedule = () => {
+//   const testConfig = [
+//     {
+//       time: '* * * * *',
+//       destinations: [{guildId: '726891390683841064', channelId: '731911474737578015'}],
+//       command: '',
+//     },
+//   ];
+
+//   const configJson = JSON.stringify(testConfig);
+
+//   const config = JSON.parse(configJson);
+
+//   console.log(config);
+
+//   function test() {
+//     const c = bot.channels.cache.get('731911474737578015');
+//     c!.send('asdf');
+//   }
+
+//   test();
+// };

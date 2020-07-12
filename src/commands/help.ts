@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import {DiscordBotCommandExtension, DiscordBotCommand} from 'src/bot';
+import {DiscordBotCommand} from 'typings/discord.js';
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ const botCommand: DiscordBotCommand = {
   aliases: ['commands'],
   execute: (message: Discord.Message, args: string[]): void => {
     const data: string[] = [];
-    const {commands} = message.client as DiscordBotCommandExtension;
+    const {commands} = message.client;
 
     if (!commands) return;
 
