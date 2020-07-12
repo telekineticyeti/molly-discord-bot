@@ -51,7 +51,7 @@ const botCommand: DiscordBotCommand = {
     if (command.description) data.push(`**Description:** ${command.description}`);
     if (command.usage) data.push(`**Usage:** ${prefix}${command.name} ${command.usage}`);
 
-    message.channel.send(data, {split: true});
+    message.reply(data, {split: true});
   },
 };
 

@@ -21,7 +21,10 @@ const botCommand: DiscordBotCommand = {
   execute: (message: Discord.Message, args: string[]) => {
     if (message.channel.type !== 'text') return;
 
-    if (!args.length) message.reply('That command requires a subcommand. See help for details.');
+    if (!args.length) {
+      message.reply('This command requires a subcommand. See help for details.');
+      return;
+    }
 
     const voiceChannel = message.member!.voice.channel;
 

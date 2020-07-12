@@ -4,6 +4,6 @@ COPY package*.json ./
 COPY . .
 RUN apt-get update \
   && apt-get install -y ffmpeg \
-  && npm install \
-  && npm run build
-CMD [ "npm", "run", "deploy:start" ]
+  && yarn install \
+  && yarn run build
+CMD [ "yarn", "run", "deploy:start" ]

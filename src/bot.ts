@@ -33,6 +33,7 @@ for (let file of commandFiles) {
   file = file.replace(env.commandsFolder, './');
   const command = require(file);
   bot.commands.set(command.name, command);
+  console.info(`Command Module Loaded: ${command.name} [${command.description}]`);
 }
 
 bot.on('ready', () => {
