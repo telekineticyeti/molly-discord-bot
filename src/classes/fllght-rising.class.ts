@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import * as Discord from 'discord.js';
+import {attachmentFromUrl} from './utlities.class';
 
 export class FlightRising {
   // https://flightrising.com/main.php?p=dominance
@@ -22,7 +23,7 @@ export class FlightRising {
     return this.parseTime($('.time.common-tooltip').text());
   }
 
-  public async getExaltBonuses(): Promise<IExaltBonuses> {
+  public async getExaltBonuses(): Promise<IExaltBonus[]> {
     const $ = cheerio.load(await this.getPage(this.baseUrl));
     return this.parseExaltBonuses($('#bonus-ticker .bonus-text'));
   }
@@ -40,42 +41,23 @@ export class FlightRising {
     return count.replace('Users Online', '').trim();
   }
 
-  private parseExaltBonuses(rawBonuses: Cheerio): IExaltBonuses {
+  private parseExaltBonuses(rawBonuses: Cheerio): IExaltBonus[] {
     const $ = cheerio;
-
-    const bonuses = {
-      primary: '',
-      primaryAmount: 0,
-      breed: '',
-      breedAmount: 0,
-      gene: '',
-      geneAmount: 0,
-    };
-
-    const bonusFilter = (bonusExpl: string[]) => {
-      const bonusType = bonusExpl[0].trim().split(' ')[1];
-
-      switch (bonusType as BonusTypes) {
-        case 'Primary':
-          bonuses.primary = bonusExpl[0].trim().split(' ')[0];
-          bonuses.primaryAmount = parseInt(bonusExpl[1]);
-          break;
-        case 'Breed':
-          bonuses.breed = bonusExpl[0].trim().split(' ')[0];
-          bonuses.breedAmount = parseInt(bonusExpl[1]);
-          break;
-        case 'Gene':
-          bonuses.gene = bonusExpl[0].trim().split(' ')[0];
-          bonuses.geneAmount = parseInt(bonusExpl[1]);
-          break;
-        default:
-          throw `Filter failure: ${bonusExpl}`;
-      }
-    };
+    const bonuses: IExaltBonus[] = [];
 
     rawBonuses.each((_i, ele) => {
       const bonus = $(ele).text().split('+');
-      bonusFilter(bonus);
+      const type = bonus[0].trim().split(' ')[0];
+      const name = bonus[0].trim().split(' ')[1];
+      const amount = parseInt(bonus[1]);
+
+      bonuses.push({name, type, amount});
+    });
+
+    bonuses.sort((a, b) => {
+      if (a.amount > b.amount) return -1;
+      if (a.amount < b.amount) return 1;
+      return 0;
     });
 
     return bonuses;
@@ -132,46 +114,34 @@ export class FlightRising {
       This random dragon is ${randomDragon.clan}'s Level ${randomDragon.level} **${randomDragon.name}**
     `;
 
-    const imageResponse = await fetch(this.baseUrl + randomDragon.imageUrl);
-    const imageStream = await imageResponse.buffer();
-    const imageAttachment = new Discord.MessageAttachment(imageStream, 'randomDragon.png');
+    const attachment = await attachmentFromUrl(
+      this.baseUrl + randomDragon.imageUrl,
+      'randomDragon.png',
+    );
+
+    const renderBonuses = exaltBonuses.map(bonus => {
+      return {
+        name: `${bonus.name}:`,
+        value: `***${bonus.type}*** - ${bonus.amount} `,
+        inline: true,
+      };
+    });
 
     return new Discord.MessageEmbed()
       .setColor('#731d08')
       .setTitle(`Todays Exalt Bonuses`)
       .setURL(randomDragon.url)
       .setDescription(description)
-      .attachFiles([imageAttachment])
+      .attachFiles([attachment])
       .setThumbnail('attachment://randomDragon.png')
-      .addFields(
-        {
-          name: `Primary Bonus:`,
-          value: `***${exaltBonuses.primary}*** - ${exaltBonuses.primaryAmount} `,
-          inline: true,
-        },
-        {
-          name: `Breed Bonus:`,
-          value: `***${exaltBonuses.breed}*** - ${exaltBonuses.breedAmount} `,
-          inline: true,
-        },
-        {
-          name: `Gene Bonus:`,
-          value: `***${exaltBonuses.gene}*** - ${exaltBonuses.geneAmount} `,
-          inline: true,
-        },
-      );
+      .addFields(renderBonuses);
   }
 }
 
-export type BonusTypes = 'Breed' | 'Primary' | 'Gene';
-
-export interface IExaltBonuses {
-  primary: string;
-  primaryAmount: number;
-  breed: string;
-  breedAmount: number;
-  gene: string;
-  geneAmount: number;
+interface IExaltBonus {
+  name: string;
+  type: string;
+  amount: number;
 }
 
 export interface IRandomDragon {

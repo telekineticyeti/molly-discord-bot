@@ -1,4 +1,6 @@
 import * as fs from 'fs';
+import fetch from 'node-fetch';
+import * as Discord from 'discord.js';
 
 /**
  * Output files, recurse through directories
@@ -18,4 +20,13 @@ export function walkFiles(dir: string): string[] {
     }
   });
   return results;
+}
+
+export async function attachmentFromUrl(
+  url: string,
+  name = 'attachment',
+): Promise<Discord.MessageAttachment> {
+  const response = await fetch(url);
+  const content = await response.buffer();
+  return new Discord.MessageAttachment(content, name);
 }
