@@ -84,3 +84,9 @@ export interface DiscordBotCommand {
   args?: boolean;
   execute(message: Discord.Message, ags: any): any;
 }
+
+import {Fo76} from './classes/fo76.class';
+
+const fo76 = new Fo76();
+
+fo76.getNuclearCodes();
