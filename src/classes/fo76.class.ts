@@ -1,45 +1,67 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import * as moment from 'moment';
+import * as Discord from 'discord.js';
+import {attachmentFromFile} from './utlities.class';
 
 export class Fo76 {
-  public async getNuclearCodes(): Promise<void> {
+  public async getNuclearCodes(): Promise<INuclearCodes> {
     const response = await fetch('https://nukacrypt.com/');
     const $ = cheerio.load(await response.text());
 
-    const date = $('#nuclearcodess tr:nth-child(2) th').text().replace('Week of', '').trim();
-    // const headers = $('#nuclearcodess tr:nth-child(3) th');
-    // const data = $('#nuclearcodess tr:nth-child(4) td');
+    const siteNames: string[] = [];
+    const keyCodes: number[] = [];
+    const dates = $('#nuclearcodess tr:nth-child(2) th')
+      .text()
+      .replace('Week of', '')
+      .trim()
+      .split('-');
+    $('#nuclearcodess tr:nth-child(3) th').each((_i, h) =>
+      siteNames.push($(h).text().toLowerCase()),
+    );
+    $('#nuclearcodess tr:nth-child(4) td').each((_i, h) => keyCodes.push(parseInt($(h).text())));
 
-    // console.log(date);
+    const result: INuclearCodes = {
+      validFrom: moment(`${dates[0]} 17:00`, 'MM/DD hh:mm').unix(),
+      validUntil: moment(`${dates[1]} 17:00`, 'MM/DD hh:mm').unix(),
+      codes: {},
+    };
 
-    const dates = date.split('-');
+    siteNames.forEach((site: string, i) => (result.codes[site] = keyCodes[i]));
 
-    console.log(moment(`${dates[0]} 17:00`, 'MM/DD hh:mm').fromNow());
-    console.log(moment(`${dates[1]} 17:00`, 'MM/DD hh:mm').fromNow());
+    return result;
+  }
 
-    // .each((i, h) => {
+  public async composeNuclearCodeMessage(): Promise<Discord.MessageEmbed> {
+    const codesData = await this.getNuclearCodes();
+    const reset = moment.unix(codesData.validUntil).fromNow();
 
-    //   // console.log($(h).text()),
+    const attachment = await attachmentFromFile(
+      '../../assets/images/fallout/bombrider.png',
+      'nukes.png',
+    );
 
-    //   const codes = {
+    const renderCodes = Object.keys(codesData.codes).map(e => ({
+      name: e.toLocaleUpperCase(),
+      value: codesData.codes[e],
+      inline: true,
+    }));
 
-    //   }
-
-    //   i 0-2, arr1
-    //   i 3-5, arr2
-
-    // }
-    // );
-
-    // console.log(test);
-    // $('table tr:nth-child(2) table:nth-child(2) tr td:nth-child(2)').text()
+    return new Discord.MessageEmbed()
+      .setColor('#0000ff')
+      .setTitle(`Nuclear Codes`)
+      .setDescription(`Nuclear launch codes will reset ***${reset}***`)
+      .setURL('https://nukacrypt.com/')
+      .addFields(renderCodes)
+      .attachFiles([attachment])
+      .setThumbnail('attachment://nukes.png');
   }
 }
 
-// interface NuclearCodes {
-//   date: string;
-//   alpha: number;
-//   bravo: number;
-//   charlie: number;
-// }
+interface INuclearCodes {
+  validFrom: number;
+  validUntil: number;
+  codes: {
+    [key: string]: number;
+  };
+}
