@@ -1,6 +1,8 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
+import * as cron from 'node-cron';
 import {walkFiles} from './classes/utlities.class';
+import {FlightRising} from './classes/fllght-rising.class';
 
 dotenv.config();
 
@@ -72,25 +74,25 @@ interface EnvironmentInfo {
   prefix: string;
 }
 
-// const schedule = () => {
-//   const testConfig = [
-//     {
-//       time: '* * * * *',
-//       destinations: [{guildId: '726891390683841064', channelId: '731911474737578015'}],
-//       command: '',
-//     },
-//   ];
+/**
+ * Temporary Command scheduling
+ */
 
-//   const configJson = JSON.stringify(testConfig);
+const fr = new FlightRising();
 
-//   const config = JSON.parse(configJson);
+cron.schedule('5 9 * * *', async () => {
+  const c = bot.channels.cache.get('732370971104641024'); //#droppod
+  // const c = bot.channels.cache.get('731911474737578015'); // test/#news
+  const bonus = await fr.composeBonusMessage();
+  c!.send(bonus);
+});
 
-//   console.log(config);
+/**
+ * TODO: Proposed Schedule Config
+ */
 
-//   function test() {
-//     const c = bot.channels.cache.get('731911474737578015');
-//     c!.send('asdf');
-//   }
-
-//   test();
-// };
+// interface ScheduleConfig {
+//   time: string; // '* * * * *'
+//   targetChannelIds: number[]; // '731911474737578015'
+//   invokeCommand: string; 'command()'
+// }

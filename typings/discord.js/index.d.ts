@@ -2,7 +2,7 @@ import * as Discord from 'discord.js';
 
 declare module 'discord.js' {
   interface Channel {
-    send(message: string): Promise<this>;
+    send(message: string | Discord.MessageEmbed): Promise<this>;
   }
   interface Client {
     commands?: Discord.Collection<string, DiscordBotCommand>;
