@@ -17,6 +17,13 @@ export interface DiscordBotCommand {
   usage?: string;
   args?: boolean;
   categories?: CommandCategory[];
+  subcommands?: DiscordSubCommand[];
+  execute(message: Discord.Message, ags: any): any;
+}
+
+export interface DiscordSubCommand {
+  name: string;
+  usage: string;
   execute(message: Discord.Message, ags: any): any;
 }
 

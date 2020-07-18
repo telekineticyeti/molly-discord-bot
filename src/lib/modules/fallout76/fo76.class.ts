@@ -1,14 +1,15 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import * as moment from 'moment';
-import * as Discord from 'discord.js';
-import {BotUtils} from '../../classes/utlities.class';
 
 export class Fo76 {
-  private botUtils = new BotUtils(__dirname);
+  private readonly bethesdaBaseUrl = 'https://fallout.bethesda.net';
+  private readonly bethesdaNewsApiUrl =
+    this.bethesdaBaseUrl + '/api/v1/components/news?games=&exclude=&offset=0-0&lang=en';
+  private readonly urlNukeCodes = 'https://nukacrypt.com/';
 
   public async getNuclearCodes(): Promise<INuclearCodes> {
-    const response = await fetch('https://nukacrypt.com/');
+    const response = await fetch(this.urlNukeCodes);
     const $ = cheerio.load(await response.text());
 
     const siteNames: string[] = [];
@@ -18,52 +19,56 @@ export class Fo76 {
       .replace('Week of', '')
       .trim()
       .split('-');
+
     $('#nuclearcodess tr:nth-child(3) th').each((_i, h) =>
       siteNames.push($(h).text().toLowerCase()),
     );
+
     $('#nuclearcodess tr:nth-child(4) td').each((_i, h) => keyCodes.push(parseInt($(h).text())));
 
-    const result: INuclearCodes = {
-      validFrom: moment(`${dates[0]} 17:00`, 'MM/DD hh:mm').unix(),
-      validUntil: moment(`${dates[1]} 17:00`, 'MM/DD hh:mm').unix(),
-      codes: {},
-    };
+    const validFrom = moment(`${dates[0]} 17:00`, 'MM/DD hh:mm').unix();
+    const validUntil = moment(`${dates[1]} 17:00`, 'MM/DD hh:mm').unix();
+    const nextResetFriendly = moment.unix(validUntil).fromNow();
+    const result: INuclearCodes = {validFrom, validUntil, nextResetFriendly, codes: {}};
 
     siteNames.forEach((site: string, i) => (result.codes[site] = keyCodes[i]));
 
     return result;
   }
 
-  public async composeNuclearCodeMessage(): Promise<Discord.MessageEmbed> {
-    const codesData = await this.getNuclearCodes();
-    const reset = moment.unix(codesData.validUntil).fromNow();
+  public async getNews() {
+    const response = await fetch(this.bethesdaNewsApiUrl);
+    const newsJson = await response.json();
 
-    const attachment = await this.botUtils.attachmentFromFile(
-      './assets/images/bombrider.png',
-      'nukes.png',
-    );
+    const newsArray: INews[] = newsJson.entries.map((article: any) => {
+      return {
+        id: article.id,
+        blurb: article.blurb,
+        title: article.title,
+        imageUrl: `https:${article.image}`,
+        newsUrl: this.bethesdaBaseUrl + article.url,
+        date: article.date,
+      };
+    });
 
-    const renderCodes = Object.keys(codesData.codes).map(e => ({
-      name: e.toLocaleUpperCase(),
-      value: codesData.codes[e],
-      inline: true,
-    }));
-
-    return new Discord.MessageEmbed()
-      .setColor('#0000ff')
-      .setTitle(`Nuclear Codes`)
-      .setDescription(`Nuclear launch codes will reset ***${reset}***`)
-      .setURL('https://nukacrypt.com/')
-      .addFields(renderCodes)
-      .attachFiles([attachment])
-      .setThumbnail('attachment://nukes.png');
+    return newsArray;
   }
 }
 
 interface INuclearCodes {
   validFrom: number;
   validUntil: number;
+  nextResetFriendly: string;
   codes: {
     [key: string]: number;
   };
+}
+
+interface INews {
+  id: string;
+  blurb: string;
+  title: string;
+  imageUrl: string;
+  newsUrl: string;
+  date: string;
 }

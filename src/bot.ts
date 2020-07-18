@@ -23,25 +23,30 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
 }
 
 /**
- * Create the bot client and parse command files
+ * Create the bot client
  */
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
-const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file =>
-  file.match(env.commandFileRegex),
-);
+/**
+ * Import bot command files
+ */
 
-console.log(commandFiles);
+(async () => {
+  const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file =>
+    file.match(env.commandFileRegex),
+  );
 
-for (let file of commandFiles) {
-  file = file.replace(env.commandsFolder, './');
-  const command = require(file);
-  if (command.name) {
-    bot.commands.set(command.name, command);
-    console.info(`Command Module Loaded: ${command.name} [${file}]`);
+  for (let file of commandFiles) {
+    file = file.replace(env.commandsFolder, './');
+
+    const command = await import(file);
+    if (command.name) {
+      bot.commands!.set(command.name, command);
+      console.info(`Command Module Loaded: ${command.name}`);
+    }
   }
-}
+})();
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
