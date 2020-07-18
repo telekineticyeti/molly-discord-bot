@@ -4,10 +4,11 @@ import {DiscordBotCommand} from 'typings/discord.js';
 const drg = new DeepRockBotCommands();
 
 const botCommand: DiscordBotCommand = {
-  name: 'deepdive',
+  name: 'deepdives',
   description: `Show this week's deep dive information`,
   cooldown: 5,
-  aliases: ['deepdives'],
+  aliases: ['deepdive'],
+  categories: ['Info'],
   execute: async (message: Discord.Message): Promise<void> => {
     const deepDiveInfo = await drg.getDeepDives();
     message.channel.send(deepDiveInfo);

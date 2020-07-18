@@ -4,20 +4,22 @@ import {DiscordBotCommand} from 'typings/discord.js';
 
 const yt = new DiscordYoutube();
 
-const usage = `**command** [_Youtube URL_ or _Youtube Video ID_] [_start tine_] [_end time_]
-**Available !yt Commands:**
-***play*** - Play the video. Must be in a voice channel.
-***stop*** - Stop the video.
-***save*** - Save the video's audio and attach it to the channel. (NOT YET IMPLEMENTED)
-`;
+const usage =
+  `\`subcommand\` \`(Youtube URL or ID)\`\n` + // \`start time\` \`end time\`\n`
+  `\n` +
+  `**Available sub-commands:**\n` +
+  `\`play\` - Start playback. Invokee must be in a voice channel.\n` +
+  `\`stop\` - Stop playback.\n`;
+// `\`save\` - Save the video's audio and attach it to the channel. ***TBA***\n`;
 
 const botCommand: DiscordBotCommand = {
-  name: 'yt',
-  description: `Play / Record Youtube audio`,
+  name: 'youtube',
+  description: `Play & record Youtube audio`,
   usage,
-  aliases: ['youtube'],
+  aliases: ['yt'],
   cooldown: 5,
   args: true,
+  categories: ['Fun'],
   execute: (message: Discord.Message, args: string[]) => {
     if (message.channel.type !== 'text') return;
 

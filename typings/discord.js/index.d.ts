@@ -16,5 +16,8 @@ export interface DiscordBotCommand {
   aliases?: string[];
   usage?: string;
   args?: boolean;
+  categories?: CommandCategory[];
   execute(message: Discord.Message, ags: any): any;
 }
+
+export type CommandCategory = 'Fun' | 'Utility' | 'Info';

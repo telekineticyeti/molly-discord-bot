@@ -59,10 +59,11 @@ const getRandomInt = (): number => {
 };
 
 const botCommand: DiscordBotCommand = {
-  name: 'slap',
+  name: 'slapdice',
   description: `Slap the dice. Let fate decide.`,
   cooldown: 5,
-  aliases: ['slapdice'],
+  aliases: ['slap'],
+  categories: ['Fun'],
   execute: async (message: Discord.Message): Promise<void> => {
     const canvas = Canvas.createCanvas(250, 150);
     const ctx = canvas.getContext('2d');

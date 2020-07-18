@@ -4,20 +4,21 @@ import {DiscordBotCommand} from 'typings/discord.js';
 
 const fr = new FlightRising();
 
-const usage = `**fr** _subcommand_
-**Available sub commands:**
-***time*** - Show the server time.
-***bonus*** = Show today's Exalt bonuses.
-`;
-// ***rando*** = Show a random Dragon.
+const usage =
+  `\`subcommand\`\n` +
+  `\n` +
+  `**Available sub-commands:**\n` +
+  `\`time\` - Display Flight Rising server time.\n` +
+  `\`bonus\` - Display current exalt bonuses.\n`;
 
 const botCommand: DiscordBotCommand = {
-  name: 'fr',
+  name: 'flightrising',
   description: `Flight Rising commands`,
   cooldown: 5,
   usage,
-  aliases: ['flightrising'],
+  aliases: ['fr'],
   args: true,
+  categories: ['Info'],
   execute: (message: Discord.Message, args: string[]) => {
     if (!args.length) {
       message.reply('That command requires a subcommand. See help for details.');

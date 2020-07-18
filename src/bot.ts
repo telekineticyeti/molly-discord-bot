@@ -60,6 +60,7 @@ bot.on('message', message => {
   try {
     command.execute(message, args);
   } catch (error) {
+    console.error(error);
     message.reply('Bweee wooo <:sadMoops:728756268474302536>');
   }
 });
