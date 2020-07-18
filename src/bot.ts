@@ -12,7 +12,8 @@ dotenv.config();
 let env: EnvironmentInfo = {
   mode: 'Development',
   commandsFolder: './src',
-  commandFileRegex: /commands\.(js|ts)$/,
+  // TODO: on prod this regex is not working for some reason.
+  commandFileRegex: /(commands?)\.(js|ts)$/,
   token: process.env.TOKEN!,
   prefix: process.env.PREFIX || '!',
 };
@@ -31,11 +32,15 @@ const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file 
   file.match(env.commandFileRegex),
 );
 
+console.log(commandFiles);
+
 for (let file of commandFiles) {
   file = file.replace(env.commandsFolder, './');
   const command = require(file);
-  bot.commands.set(command.name, command);
-  console.info(`Command Module Loaded: ${command.name} [${command.description}]`);
+  if (command.name) {
+    bot.commands.set(command.name, command);
+    console.info(`Command Module Loaded: ${command.name} [${file}]`);
+  }
 }
 
 bot.on('ready', () => {
