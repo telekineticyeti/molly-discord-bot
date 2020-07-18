@@ -37,10 +37,20 @@ const botCommand: DiscordBotCommand = {
       if (await yt.isValidVideo(track)) {
         voiceChannel.join().then(connection => {
           yt.playing = true;
-          const dispatcher = connection.play(yt.playStream(track));
-          dispatcher.on('finish', () => {
-            yt.playing = false;
-            voiceChannel.leave();
+
+          yt.playStream(track).then(stream => {
+            const dispatcher = connection.play(stream);
+
+            dispatcher.on('start', () => {
+              message.client.user?.setActivity(yt.nowPlaying.title, {
+                type: 'LISTENING',
+                url: yt.nowPlaying.url,
+              });
+            });
+
+            dispatcher.on('finish', () => stop());
+            dispatcher.on('stop', () => stop());
+            dispatcher.on('error', () => stop());
           });
         });
       } else {
@@ -49,9 +59,9 @@ const botCommand: DiscordBotCommand = {
     };
 
     const stop = () => {
-      if (!voiceChannel) return;
       yt.playing = false;
-      voiceChannel.leave();
+      message.client.user?.setActivity('', {});
+      if (voiceChannel) voiceChannel.leave();
     };
 
     const error = (error: string) => {
