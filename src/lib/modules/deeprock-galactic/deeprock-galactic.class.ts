@@ -1,8 +1,10 @@
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
 import * as moment from 'moment';
+import {BotUtils} from '../../classes/utlities.class';
 
 export class DeepRockBotCommands {
+  private botUtils = new BotUtils(__dirname);
   public vaQuotes: string[] = [
     `THEY'RE COMIN' OUTTA THE KARL-DAMNED WALLS! 🦟`,
     `Hello Darkness My Old Friend, Hahaha!`,
@@ -38,7 +40,7 @@ export class DeepRockBotCommands {
    * as an embed.
    * @param postObject Reddit thread object
    */
-  private composeDeepDiveEmbed(rawPost: IRedditThread): Discord.MessageEmbed {
+  private async composeDeepDiveEmbed(rawPost: IRedditThread): Promise<Discord.MessageEmbed> {
     const regex = new RegExp(/\*{2}Deep Dive\*{2}(.*)\*{2}Elite Deep Dive\*{2}/is);
     let details = rawPost.selftext.match(regex);
 
@@ -63,33 +65,46 @@ export class DeepRockBotCommands {
       return moment(now).fromNow();
     };
 
+    const thumbnail = await this.botUtils.attachmentFromFile(
+      './assets/images/192px-DeepDive_Icon.png',
+      'thumbnail.png',
+    );
+
+    const footer = await this.botUtils.attachmentFromFile(
+      './assets/images/192px-Mining_expedition_icon.png',
+      'footer.png',
+    );
+
+    const fields = [
+      {
+        name: `Stage ${exp[12]}`,
+        value: `${exp[13]} + ${exp[14]} \n${anomaly(exp[15])}${warning(exp[16])}`,
+      },
+      {
+        name: `Stage ${exp[17]}`,
+        value: `${exp[18]} + ${exp[19]} \n${anomaly(exp[20])}${warning(exp[21])}`,
+      },
+      {
+        name: `Stage ${exp[22]}`,
+        value: `${exp[23]} + ${exp[24]} \n${anomaly(exp[25])}${warning(exp[26])}`,
+      },
+      {
+        name: `Next Reset ${nextReset()}`,
+        value: `Deep dives and weekly missions reset every Earth Thursday`,
+      },
+    ];
+
     return new Discord.MessageEmbed()
       .setColor('#cb6e00')
       .setTitle('Weekly Deep Dive')
       .setURL(rawPost.url)
       .setDescription(`**${exp[1]}** @ ${exp[2]}`)
-      .setThumbnail(
-        'https://github.com/telekineticyeti/molly-discord-bot/blob/master/assets/images/deeprockgalactic/192px-DeepDive_Icon.png?raw=true',
-      )
-      .addField(
-        `Stage ${exp[12]}`,
-        `${exp[13]} + ${exp[14]} \n${anomaly(exp[15])}${warning(exp[16])}`,
-      )
-      .addField(
-        `Stage ${exp[17]}`,
-        `${exp[18]} + ${exp[19]} \n${anomaly(exp[20])}${warning(exp[21])}`,
-      )
-      .addField(
-        `Stage ${exp[22]}`,
-        `${exp[23]} + ${exp[24]} \n${anomaly(exp[25])}${warning(exp[26])}`,
-      )
-      .addField(
-        `Next Reset ${nextReset()}`,
-        `Deep dives and weekly missions reset every Earth Thursday`,
-      )
+      .attachFiles([thumbnail, footer])
+      .setThumbnail('attachment://thumbnail.png')
+      .addFields(fields)
       .setFooter(
         this.vaQuotes[Math.floor(Math.random() * this.vaQuotes.length)],
-        'https://github.com/telekineticyeti/molly-discord-bot/blob/master/assets/images/deeprockgalactic/192px-Mining_expedition_icon.png?raw=true',
+        'attachment://footer.png',
       )
       .setTimestamp(new Date(rawPost.created_utc * 1000));
   }

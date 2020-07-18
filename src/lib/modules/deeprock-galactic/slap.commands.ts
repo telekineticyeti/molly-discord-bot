@@ -68,10 +68,9 @@ const botCommand: DiscordBotCommand = {
     const ctx = canvas.getContext('2d');
 
     try {
-      const die1 = await Canvas.loadImage('./assets/images/fuzzydie.png');
-      const die2 = await Canvas.loadImage('./assets/images/fuzzydie.png');
-      ctx.drawImage(die1, 25, 20, 100, 122);
-      ctx.drawImage(die2, 140, 20, 100, 122);
+      const die = await Canvas.loadImage(`${__dirname}/assets/images/fuzzydie.png`);
+      ctx.drawImage(die, 25, 20, 100, 122);
+      ctx.drawImage(die, 140, 20, 100, 122);
 
       drawPips(getRandomInt(), ctx);
       drawPips(getRandomInt(), ctx, 115);
@@ -79,7 +78,7 @@ const botCommand: DiscordBotCommand = {
       const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'diceslap.png');
       message.channel.send(attachment);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   },
 };

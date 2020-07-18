@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import * as Discord from 'discord.js';
-import {attachmentFromUrl} from './utlities.class';
+import {attachmentFromUrl} from '../../classes/utlities.class';
 
 export class FlightRising {
   // https://flightrising.com/main.php?p=dominance

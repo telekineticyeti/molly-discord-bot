@@ -1,8 +1,8 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
 import * as cron from 'node-cron';
-import {walkFiles} from './classes/utlities.class';
-import {FlightRising} from './classes/fllght-rising.class';
+import {walkFiles} from './lib/classes/utlities.class';
+import {FlightRising} from './lib/modules/flight-rising/fllght-rising.class';
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ dotenv.config();
 let env: EnvironmentInfo = {
   mode: 'Development',
   commandsFolder: './src',
-  commandFileRegex: /\.(js|ts)$/,
+  commandFileRegex: /commands\.(js|ts)$/,
   token: process.env.TOKEN!,
   prefix: process.env.PREFIX || '!',
 };
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
-const commandFiles = walkFiles(`${env.commandsFolder}/commands`).filter(file =>
+const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file =>
   file.match(env.commandFileRegex),
 );
 
@@ -77,7 +77,6 @@ interface EnvironmentInfo {
 /**
  * Temporary Command scheduling
  */
-
 const fr = new FlightRising();
 
 cron.schedule('5 9 * * *', async () => {
@@ -86,13 +85,3 @@ cron.schedule('5 9 * * *', async () => {
   const bonus = await fr.composeBonusMessage();
   c!.send(bonus);
 });
-
-/**
- * TODO: Proposed Schedule Config
- */
-
-// interface ScheduleConfig {
-//   time: string; // '* * * * *'
-//   targetChannelIds: number[]; // '731911474737578015'
-//   invokeCommand: string; 'command()'
-// }

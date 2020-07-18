@@ -1,5 +1,5 @@
 import * as Discord from 'discord.js';
-import {DeepRockBotCommands} from '../classes/deeprock-galactic.class';
+import {DeepRockBotCommands} from './deeprock-galactic.class';
 import {DiscordBotCommand} from 'typings/discord.js';
 const drg = new DeepRockBotCommands();
 

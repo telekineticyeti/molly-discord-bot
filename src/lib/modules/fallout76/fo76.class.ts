@@ -2,9 +2,11 @@ import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import * as moment from 'moment';
 import * as Discord from 'discord.js';
-import {attachmentFromFile} from './utlities.class';
+import {BotUtils} from '../../classes/utlities.class';
 
 export class Fo76 {
+  private botUtils = new BotUtils(__dirname);
+
   public async getNuclearCodes(): Promise<INuclearCodes> {
     const response = await fetch('https://nukacrypt.com/');
     const $ = cheerio.load(await response.text());
@@ -36,8 +38,8 @@ export class Fo76 {
     const codesData = await this.getNuclearCodes();
     const reset = moment.unix(codesData.validUntil).fromNow();
 
-    const attachment = await attachmentFromFile(
-      '../../assets/images/fallout/bombrider.png',
+    const attachment = await this.botUtils.attachmentFromFile(
+      './assets/images/bombrider.png',
       'nukes.png',
     );
 

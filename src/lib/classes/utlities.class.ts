@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as util from 'util';
+import * as path from 'path';
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
 
@@ -37,9 +37,26 @@ export async function attachmentFromFile(
   filePath: string,
   name = 'attachment',
 ): Promise<Discord.MessageAttachment> {
-  const attachmentPath = path.join(__dirname, filePath);
   const asyncReadFile = util.promisify(fs.readFile);
-  const data = await asyncReadFile(attachmentPath);
+  const data = await asyncReadFile(filePath);
 
   return new Discord.MessageAttachment(data, name);
+}
+
+export class BotUtils {
+  constructor(private modPath: string) {}
+
+  public walkFiles = walkFiles;
+  public attachmentFromUrl = attachmentFromUrl;
+
+  public async attachmentFromFile(
+    filePath: string,
+    name = 'attachment',
+  ): Promise<Discord.MessageAttachment> {
+    const attachmentPath = path.join(this.modPath, filePath);
+    const asyncReadFile = util.promisify(fs.readFile);
+    const data = await asyncReadFile(attachmentPath);
+
+    return new Discord.MessageAttachment(data, name);
+  }
 }

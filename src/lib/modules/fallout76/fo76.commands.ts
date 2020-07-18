@@ -1,5 +1,5 @@
 import * as Discord from 'discord.js';
-import {Fo76} from '../classes/fo76.class';
+import {Fo76} from './fo76.class';
 import {DiscordBotCommand} from 'typings/discord.js';
 const fo76 = new Fo76();
 
