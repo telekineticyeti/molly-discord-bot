@@ -43,11 +43,17 @@ export async function attachmentFromFile(
   return new Discord.MessageAttachment(data, name);
 }
 
+export function randomItemFromArray(array: any[]): unknown {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
+}
+
 export class BotUtils {
   constructor(private modPath: string) {}
 
   public walkFiles = walkFiles;
   public attachmentFromUrl = attachmentFromUrl;
+  public randomItemFromArray = randomItemFromArray;
 
   public async attachmentFromFile(
     filePath: string,
