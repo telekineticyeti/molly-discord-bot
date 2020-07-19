@@ -18,13 +18,13 @@ export interface DiscordBotCommand {
   args?: boolean;
   categories?: CommandCategory[];
   subcommands?: DiscordSubCommand[];
-  execute(message: Discord.Message, ags: any): any;
+  execute(message: Discord.Message | Discord.Channel, args?: any): any;
 }
 
 export interface DiscordSubCommand {
   name: string;
   usage: string;
-  execute(message: Discord.Message, ags: any): any;
+  execute(message: Discord.Message | Discord.Channel, args?: any): any;
 }
 
 export type CommandCategory = 'Fun' | 'Utility' | 'Info';
@@ -32,5 +32,12 @@ export type CommandCategory = 'Fun' | 'Utility' | 'Info';
 export interface ScheduleConfig {
   name: string;
   cronTime: string;
-  execute(client?: Discord.Client): any;
+  targetChannel?: string;
+  targetUser?: string;
+  command?: {
+    module: string;
+    subcommand?: string;
+    args?: string;
+  };
+  execute?(client?: Discord.Client): any;
 }

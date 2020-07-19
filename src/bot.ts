@@ -1,7 +1,9 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import * as cron from 'node-cron';
 import {walkFiles} from './lib/classes/utlities.class';
+import {BotUtils} from './lib/classes/utlities.class';
+
+const botUtils = new BotUtils(__dirname);
 
 dotenv.config();
 
@@ -48,7 +50,7 @@ bot.commands = new Discord.Collection();
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
-  schedulerSetup();
+  botUtils.setupScheduledTasks(bot);
 });
 
 bot.on('message', message => {
@@ -82,16 +84,3 @@ interface EnvironmentInfo {
   token: string;
   prefix: string;
 }
-
-const schedulerSetup = async () => {
-  const scheduler = await import('./lib/modules/scheduler/schedule');
-
-  scheduler.forEach(task => {
-    try {
-      cron.schedule(task.cronTime, task.execute(bot));
-      console.log(`Scheduled task: ${task.name}`);
-    } catch (e) {
-      console.error(`Schedule task FAILED: ${task.name}: ${e}`);
-    }
-  });
-};

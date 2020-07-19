@@ -24,5 +24,5 @@
     "typeRoots": ["./typings", "./src/typings", "node_modules/@types"],
     "lib": ["es2018", "dom"]
   },
-  "exclude": ["node_modules", ".vscode"]
+  "exclude": ["node_modules", ".vscode", "helpers"]
 }
