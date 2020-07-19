@@ -28,3 +28,9 @@ export interface DiscordSubCommand {
 }
 
 export type CommandCategory = 'Fun' | 'Utility' | 'Info';
+
+export interface ScheduleConfig {
+  name: string;
+  cronTime: string;
+  execute(client?: Discord.Client): any;
+}

@@ -3,6 +3,7 @@ import * as util from 'util';
 import * as path from 'path';
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
+import {DiscordSubCommand} from 'typings/discord.js';
 
 /**
  * Output files, recurse through directories
@@ -48,12 +49,23 @@ export function randomItemFromArray(array: any[]): unknown {
   return array[randomIndex];
 }
 
+export function generateCommandUsageString(subcommands: DiscordSubCommand[]): string {
+  let usageString = `\`subcommand\`\n` + `\n` + `**Available sub-commands:**\n`;
+
+  subcommands.forEach(
+    subcommand => (usageString += `\`${subcommand.name}\` - ${subcommand.usage}\n`),
+  );
+
+  return usageString;
+}
+
 export class BotUtils {
   constructor(private modPath: string) {}
 
   public walkFiles = walkFiles;
   public attachmentFromUrl = attachmentFromUrl;
   public randomItemFromArray = randomItemFromArray;
+  public generateCommandUsageString = generateCommandUsageString;
 
   public async attachmentFromFile(
     filePath: string,

@@ -53,20 +53,10 @@ const subcommands = [
   },
 ];
 
-const usage = (): string => {
-  let usageString = `\`subcommand\`\n` + `\n` + `**Available sub-commands:**\n`;
-
-  subcommands.forEach(
-    subcommand => (usageString += `\`${subcommand.name}\` - ${subcommand.usage}\n`),
-  );
-
-  return usageString;
-};
-
 const botCommand: DiscordBotCommand = {
   name: 'fallout76',
   description: `Fallout 76 Commands`,
-  usage: usage(),
+  usage: botUtils.generateCommandUsageString(subcommands),
   aliases: ['76', 'fo76', 'fo'],
   args: true,
   categories: ['Info'],

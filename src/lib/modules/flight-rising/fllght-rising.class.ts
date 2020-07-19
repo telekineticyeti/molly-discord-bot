@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
-import * as Discord from 'discord.js';
-import {attachmentFromUrl} from '../../classes/utlities.class';
+// import * as Discord from 'discord.js';
+// import {attachmentFromUrl} from '../../classes/utlities.class';
 
 export class FlightRising {
   // https://flightrising.com/main.php?p=dominance
@@ -31,6 +31,17 @@ export class FlightRising {
   public async getRandomDragon(): Promise<IRandomDragon> {
     const $ = cheerio.load(await this.getPage(this.baseUrl));
     return this.parseRandomDragon($('#random-dragon'));
+  }
+
+  public async getFrontPage() {
+    const $ = cheerio.load(await this.getPage(this.baseUrl));
+
+    const randomDragon = this.parseRandomDragon($('#random-dragon'));
+    const time = this.parseTime($('.time.common-tooltip').text());
+    const userCount = this.parseUserCount($('.users-online .online').text());
+    const exaltBonuses = this.parseExaltBonuses($('#bonus-ticker .bonus-text'));
+
+    return {randomDragon, time, userCount, exaltBonuses};
   }
 
   private parseTime(time: string): string {
@@ -99,42 +110,6 @@ export class FlightRising {
     }
 
     return dragon;
-  }
-
-  public async composeBonusMessage(): Promise<Discord.MessageEmbed> {
-    const $ = cheerio.load(await this.getPage(this.baseUrl));
-
-    const randomDragon = this.parseRandomDragon($('#random-dragon'));
-    const exaltBonuses = this.parseExaltBonuses($('#bonus-ticker .bonus-text'));
-    const time = this.parseTime($('.time.common-tooltip').text());
-    const userCount = this.parseUserCount($('.users-online .online').text());
-
-    const description = `
-      Server time is ${time}. There are ${userCount} people online.
-      This random dragon is ${randomDragon.clan}'s Level ${randomDragon.level} **${randomDragon.name}**
-    `;
-
-    const attachment = await attachmentFromUrl(
-      this.baseUrl + randomDragon.imageUrl,
-      'randomDragon.png',
-    );
-
-    const renderBonuses = exaltBonuses.map(bonus => {
-      return {
-        name: `${bonus.name}:`,
-        value: `***${bonus.type}*** - ${bonus.amount} `,
-        inline: true,
-      };
-    });
-
-    return new Discord.MessageEmbed()
-      .setColor('#731d08')
-      .setTitle(`Todays Exalt Bonuses`)
-      .setURL(randomDragon.url)
-      .setDescription(description)
-      .attachFiles([attachment])
-      .setThumbnail('attachment://randomDragon.png')
-      .addFields(renderBonuses);
   }
 }
 

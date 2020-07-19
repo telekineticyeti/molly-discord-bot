@@ -2,7 +2,6 @@ import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
 import * as cron from 'node-cron';
 import {walkFiles} from './lib/classes/utlities.class';
-import {FlightRising} from './lib/modules/flight-rising/fllght-rising.class';
 
 dotenv.config();
 
@@ -31,7 +30,6 @@ bot.commands = new Discord.Collection();
 /**
  * Import bot command files
  */
-
 (async () => {
   const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file =>
     file.match(env.commandFileRegex),
@@ -50,7 +48,7 @@ bot.commands = new Discord.Collection();
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
-  // schedule();
+  schedulerSetup();
 });
 
 bot.on('message', message => {
@@ -85,14 +83,15 @@ interface EnvironmentInfo {
   prefix: string;
 }
 
-/**
- * Temporary Command scheduling
- */
-const fr = new FlightRising();
+const schedulerSetup = async () => {
+  const scheduler = await import('./lib/modules/scheduler/schedule');
 
-cron.schedule('5 9 * * *', async () => {
-  const c = bot.channels.cache.get('732370971104641024'); //#droppod
-  // const c = bot.channels.cache.get('731911474737578015'); // test/#news
-  const bonus = await fr.composeBonusMessage();
-  c!.send(bonus);
-});
+  scheduler.forEach(task => {
+    try {
+      cron.schedule(task.cronTime, task.execute(bot));
+      console.log(`Scheduled task: ${task.name}`);
+    } catch (e) {
+      console.error(`Schedule task FAILED: ${task.name}: ${e}`);
+    }
+  });
+};
