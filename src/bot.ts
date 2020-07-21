@@ -1,6 +1,5 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import {walkFiles} from './lib/classes/utlities.class';
 import {BotUtils} from './lib/classes/utlities.class';
 
 const botUtils = new BotUtils(__dirname);
@@ -33,9 +32,9 @@ bot.commands = new Discord.Collection();
  * Import bot command files
  */
 (async () => {
-  const commandFiles = walkFiles(`${env.commandsFolder}/lib/modules`).filter(file =>
-    file.match(env.commandFileRegex),
-  );
+  const commandFiles = botUtils
+    .walkFiles(`${env.commandsFolder}/lib/modules`)
+    .filter(file => file.match(env.commandFileRegex));
 
   for (let file of commandFiles) {
     file = file.replace(env.commandsFolder, './');

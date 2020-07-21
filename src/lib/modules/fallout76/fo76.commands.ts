@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
 import {Fo76} from './fo76.class';
 import {DiscordBotCommand} from 'typings/discord.js';
-import {BotUtils} from '../../classes/utlities.class';
+import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
 
 const fo76 = new Fo76();
 const botUtils = new BotUtils(__dirname);
@@ -10,7 +10,7 @@ const subcommands = [
   {
     name: 'news',
     usage: 'Show latest Fallout 76 related news',
-    execute: async function (message: Discord.Message) {
+    execute: async function (target: DiscordTarget) {
       const news = await fo76.getNews();
       const embed = new Discord.MessageEmbed()
         .setColor('#0000ff')
@@ -20,13 +20,13 @@ const subcommands = [
         .addField('Date', news[0].date)
         .setThumbnail(news[0].imageUrl);
 
-      message.channel.send(embed);
+      botUtils.renderMessage(target, embed);
     },
   },
   {
     name: 'codes',
     usage: 'Display nuclear codes for this week.',
-    execute: async function (message: Discord.Message) {
+    execute: async function (target: DiscordTarget) {
       const codesData = await fo76.getNuclearCodes();
 
       const attachment = await botUtils.attachmentFromFile(
@@ -48,7 +48,7 @@ const subcommands = [
         .addFields(renderCodes)
         .attachFiles([attachment])
         .setThumbnail('attachment://nukes.png');
-      message.channel.send(embed);
+      botUtils.renderMessage(target, embed);
     },
   },
 ];

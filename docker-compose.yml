@@ -4,3 +4,4 @@ services:
     build: ./
     container_name: mollybot
     restart: unless-stopped
+    volumes: -./persist:/usr/src/app/persist

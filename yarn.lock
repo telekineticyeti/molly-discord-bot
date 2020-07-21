@@ -107,6 +107,13 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
+"@types/node-persist@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/node-persist/-/node-persist-3.1.0.tgz#fbd4df7c311afd29d7e09058a18a7c465feeacbe"
+  integrity sha512-PthI5IYq1N2HUYkC+CTrsoqbgVD5lRVWlpT1jUTmqPj11jP2hUDAyEn9ioTxDVp4y53PL89zhcTrwWIiUXAozA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/node@*":
   version "14.0.22"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.22.tgz#23ea4d88189cec7d58f9e6b66f786b215eb61bdc"
@@ -1167,6 +1174,11 @@ node-fetch@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
+
+node-persist@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/node-persist/-/node-persist-3.1.0.tgz#9d4b03950bba70d37d13d3d3551840e25fd17e09"
+  integrity sha512-/j+fd/u71wNgKf3V2bx4tnDm+3GvLnlCuvf2MXbJ3wern+67IAb6zN9Leu1tCWPlPNZ+v1hLSibVukkPK2HqJw==
 
 node-pre-gyp@^0.11.0:
   version "0.11.0"

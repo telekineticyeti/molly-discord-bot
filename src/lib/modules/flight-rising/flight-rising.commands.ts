@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
 import {FlightRising} from './fllght-rising.class';
 import {DiscordBotCommand} from 'typings/discord.js';
-import {BotUtils} from '../../classes/utlities.class';
+import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
 
 const fr = new FlightRising();
 const botUtils = new BotUtils(__dirname);
@@ -10,7 +10,7 @@ const subcommands = [
   {
     name: 'time',
     usage: 'Display Flight Rising server time',
-    execute: async function (target: Discord.Message | Discord.Channel) {
+    execute: async function (target: DiscordTarget) {
       const message = `The Flight Rising server time is ${await fr.getServerTime()}`;
       botUtils.renderMessage(target, message);
     },
@@ -18,7 +18,7 @@ const subcommands = [
   {
     name: 'bonus',
     usage: 'Display current Exalt bonuses',
-    execute: async function (target: Discord.Message | Discord.Channel) {
+    execute: async function (target: DiscordTarget) {
       const data = await fr.getFrontPage();
 
       const bonusFields = data.exaltBonuses.map(bonus => {

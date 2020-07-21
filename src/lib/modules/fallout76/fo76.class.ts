@@ -40,7 +40,7 @@ export class Fo76 {
     const response = await fetch(this.bethesdaNewsApiUrl);
     const newsJson = await response.json();
 
-    const newsArray: INews[] = newsJson.entries.map((article: any) => {
+    const newsArray: IFalloutNews[] = newsJson.entries.map((article: any) => {
       return {
         id: article.id,
         blurb: article.blurb,
@@ -55,7 +55,7 @@ export class Fo76 {
   }
 }
 
-interface INuclearCodes {
+export interface INuclearCodes {
   validFrom: number;
   validUntil: number;
   nextResetFriendly: string;
@@ -64,7 +64,7 @@ interface INuclearCodes {
   };
 }
 
-interface INews {
+export interface IFalloutNews {
   id: string;
   blurb: string;
   title: string;

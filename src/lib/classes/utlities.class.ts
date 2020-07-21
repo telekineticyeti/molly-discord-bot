@@ -71,11 +71,21 @@ export class BotUtils {
   private instanceOfMessage = (obj: any) => 'channel' in obj;
   private instanceOfChannel = (obj: any) => 'send' in obj;
 
+  /**
+   *
+   * @param target The target for the message. Either channel, message instance or user
+   * @param message The message content.
+   */
   public renderMessage(target: Message | Channel, message: string | MessageEmbed) {
     if (this.instanceOfMessage(target)) (target as Message).channel.send(message);
     if (this.instanceOfChannel(target)) (target as Channel).send(message);
   }
 
+  /**
+   * Create a message attachment from a local file.
+   * @param filePath Relative path to the local file to attach.
+   * @param name The name of the attachment
+   */
   public async attachmentFromFile(
     filePath: string,
     name = 'attachment',
@@ -86,6 +96,49 @@ export class BotUtils {
     return new MessageAttachment(data, name);
   }
 
+  /**
+   * Resolve a command or sub-command registered with the discord bot.
+   * @param client The client (bot) instance
+   * @param moduleToSearch The primary command module to search.
+   * @param subCommandToSearch (optional) The sub-command to search under the primary command.
+   */
+  public resolveCommand(client: Client, moduleToSearch: string, subCommandToSearch?: string) {
+    if (!client.commands) {
+      console.error(`The client has no loaded commands.`);
+      return;
+    }
+
+    const module = client.commands.get(moduleToSearch);
+    if (!module) {
+      console.error(`The command module \`${moduleToSearch}\` was not found.`);
+      return;
+    }
+
+    if (!subCommandToSearch) {
+      return module;
+    }
+
+    if (!module?.subcommands || !module?.subcommands?.length) {
+      console.error(`The \`${moduleToSearch}\` module command does not contain sub-commands.`);
+      return;
+    }
+
+    const subCommand = module?.subcommands?.filter(obj => obj.name === subCommandToSearch);
+    if (!subCommand.length) {
+      console.error(
+        `The \`${moduleToSearch}\` module did not contain a \`${subCommandToSearch}\` sub-command.`,
+      );
+      return;
+    }
+
+    return subCommand[0];
+  }
+
+  /**
+   * Reads the scheduled tasks file and sets up each defined task.
+   * TODO: Move this to it's own class file.
+   * @param client The client (bot) instance.
+   */
   public async setupScheduledTasks(client: Client) {
     const scheduler = await import('../modules/scheduler/schedule');
     let taskExecutor: () => void;
@@ -146,3 +199,5 @@ export class BotUtils {
     });
   }
 }
+
+export type DiscordTarget = Message | Channel;

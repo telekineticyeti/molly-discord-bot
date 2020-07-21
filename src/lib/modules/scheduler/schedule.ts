@@ -1,6 +1,12 @@
 import {ScheduleConfig} from 'typings/discord.js';
+import {Fo76} from '../fallout76/fo76.class';
+import {PersistClass} from '../../classes/persist.class';
+import {BotUtils} from '../../classes/utlities.class';
 
 const channelDropPod = '732370971104641024';
+const botUtils = new BotUtils(__dirname);
+const persist = new PersistClass();
+const fo76 = new Fo76();
 
 const scheduler: ScheduleConfig[] = [
   {
@@ -9,22 +15,33 @@ const scheduler: ScheduleConfig[] = [
     targetChannel: channelDropPod,
     command: {module: 'flightrising', subcommand: 'bonus'},
   },
-  // {
-  //   name: 'Flight Rising Daily Exalt Bonuses',
-  //   cronTime: '*/1 * * * *',
-  //   execute: client => {
-  //     const testChannel = '731911474737578015';
-  //     return () => {
-  //       if (!client) return;
-  //       const channel = client.channels.cache.get(testChannel);
-  //       const cmd = client!.commands
-  //         ?.get('flightrising')
-  //         ?.subcommands?.filter(obj => obj.name === 'time');
+  {
+    name: 'Fallout News Checker',
+    cronTime: '* */25 * * *',
+    execute: client => {
+      if (!client) return;
+      return async () => {
+        const storageKey = 'FalloutNews';
 
-  //       cmd![0].execute(channel!);
-  //     };
-  //   },
-  // },
+        const output = () => {
+          console.log('attempting output');
+          const channel = client.channels.cache.get(channelDropPod);
+          if (!channel) return;
+
+          const command = botUtils.resolveCommand(client, 'fallout76', 'news');
+          if (command) command.execute(channel);
+        };
+
+        const news = await fo76.getNews();
+        const latestNews = news[0];
+        const upsertedNews = await persist.upsertOnDiff(storageKey, latestNews);
+
+        if (JSON.stringify(upsertedNews) !== JSON.stringify(latestNews)) {
+          output();
+        }
+      };
+    },
+  },
 ];
 
 export = scheduler;
