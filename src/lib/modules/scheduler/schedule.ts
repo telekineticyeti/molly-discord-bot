@@ -17,14 +17,12 @@ const scheduler: ScheduleConfig[] = [
   },
   {
     name: 'Fallout News Checker',
-    cronTime: '* */25 * * *',
+    cronTime: '*/30 * * * *',
     execute: client => {
       if (!client) return;
       return async () => {
         const storageKey = 'FalloutNews';
-
         const output = () => {
-          console.log('attempting output');
           const channel = client.channels.cache.get(channelDropPod);
           if (!channel) return;
 
