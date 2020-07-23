@@ -49,6 +49,44 @@ const subcommands = [
       botUtils.renderMessage(target, embed);
     },
   },
+  {
+    name: 'dom',
+    usage: 'Display dominance leaderboard',
+    execute: async function (target: DiscordTarget) {
+      const data = await fr.getDominancePage();
+
+      let domList = '```';
+      data.domPositions.map((flight, idx) => {
+        const position = idx + 1;
+        let whitespace = ' ';
+
+        if (position <= 9) whitespace = '  ';
+
+        domList += `${idx + 1}${whitespace}- ${flight[0]}\n`;
+      });
+      domList += '```';
+
+      const attachment = await botUtils.attachmentFromUrl(
+        `https://flightrising.com/${data.dominatingFlag}`,
+        'domFlag.png',
+      );
+
+      const embed = new Discord.MessageEmbed()
+        .setColor('#731d08')
+        .setTitle(`Dominance`)
+        .setURL('https://flightrising.com/main.php?p=dominance')
+        .setDescription(`${data.currentlyDominating} flight is currently dominating.`)
+        .attachFiles([attachment])
+        .setThumbnail('attachment://domFlag.png')
+        .addFields({
+          name: `Next week's standings`,
+          value: domList,
+        })
+        .setFooter(`Next tally will occur ${data.timeUntilNextTally}. 🐉`);
+
+      botUtils.renderMessage(target, embed);
+    },
+  },
 ];
 
 const botCommand: DiscordBotCommand = {

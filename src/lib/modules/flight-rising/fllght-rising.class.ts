@@ -1,15 +1,8 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
-// import * as Discord from 'discord.js';
-// import {attachmentFromUrl} from '../../classes/utlities.class';
+import * as moment from 'moment';
 
 export class FlightRising {
-  // https://flightrising.com/main.php?p=dominance
-  // would be good to pull server time and at least the first three places of the righthand list; invokable command, preferable !fr dom
-
-  // https://www1.flightrising.com/
-  // bottom right box, Exalt Bonuses, would be nice to have that + server time announce once a day between 9 and 10 am our time
-
   public readonly baseUrl = 'https://www1.flightrising.com';
 
   public async getPage(url: string): Promise<string> {
@@ -42,6 +35,40 @@ export class FlightRising {
     const exaltBonuses = this.parseExaltBonuses($('#bonus-ticker .bonus-text'));
 
     return {randomDragon, time, userCount, exaltBonuses};
+  }
+
+  public async getDominancePage() {
+    const $ = cheerio.load(await this.getPage(`${this.baseUrl}/main.php?p=dominance`));
+    const domPositions = this.parseDomList(
+      $('#super-container > div:nth-child(6) > span:nth-child(1) img'),
+    );
+    const currentlyDominating = $('#domtext .domglow').text();
+    const dominatingFlag = $('#domflag img')[0].attribs.src;
+    const timeUntilNextTally = this.parseTimeUntilNextTally($('.kkcount-down10')[0].attribs.time);
+
+    return {currentlyDominating, domPositions, timeUntilNextTally, dominatingFlag};
+  }
+
+  private parseDomList(domPositions: Cheerio) {
+    let flights: [string, string][] = [];
+
+    domPositions.each((_idx, item) => {
+      const flight_image = item.attribs.src;
+      let flightName = flight_image
+        .replace(/^.*[\\\/]/, '')
+        .replace(/\.png$/, '')
+        .replace(/^(first|second)+place_/, '');
+
+      flightName = flightName.charAt(0).toUpperCase() + flightName.slice(1);
+
+      flights.push([flightName, `https://flightrising.com${flight_image}`]);
+    });
+
+    return flights;
+  }
+
+  private parseTimeUntilNextTally(time: string) {
+    return moment.unix(parseInt(time)).fromNow();
   }
 
   private parseTime(time: string): string {

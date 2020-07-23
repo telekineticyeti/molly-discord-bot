@@ -18,13 +18,13 @@ export class PersistClass {
    * @param storageKey Storage key to query
    * @param providedItem Value content to insert/update
    */
-  public async upsertOnDiff<T>(storageKey: string, providedItem: T): Promise<T> {
+  public async upsertOnDiff<T>(storageKey: string, providedItem: T): Promise<T | undefined> {
     let storedItem = await storage.getItem(storageKey);
     // No item with that key exists, create it and return the item.
     if (!storedItem) {
       await storage.setItem(storageKey, providedItem);
       console.log('no stored item found');
-      return providedItem;
+      return;
     } else {
       console.log('stored item found');
       // Provided item does not match stored item. Update stored item and return.

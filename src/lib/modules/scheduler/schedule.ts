@@ -34,7 +34,7 @@ const scheduler: ScheduleConfig[] = [
         const latestNews = news[0];
         const upsertedNews = await persist.upsertOnDiff(storageKey, latestNews);
 
-        if (JSON.stringify(upsertedNews) !== JSON.stringify(latestNews)) {
+        if (!upsertedNews || JSON.stringify(upsertedNews) !== JSON.stringify(latestNews)) {
           output();
         }
       };
