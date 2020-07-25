@@ -1,38 +1,23 @@
 import * as Discord from 'discord.js';
 import {DiscordYoutube} from './youtube.class';
 import {DiscordBotCommand} from 'typings/discord.js';
+import {BotUtils} from '../../classes/utlities.class';
 
 const yt = new DiscordYoutube();
+const botUtils = new BotUtils(__dirname);
 
-const usage =
-  `\`subcommand\` \`(Youtube URL or ID)\`\n` + // \`start time\` \`end time\`\n`
-  `\n` +
-  `**Available sub-commands:**\n` +
-  `\`play\` - Start playback. Invokee must be in a voice channel.\n` +
-  `\`stop\` - Stop playback.\n`;
-// `\`save\` - Save the video's audio and attach it to the channel. ***TBA***\n`;
+const subcommands = [
+  {
+    name: 'play',
+    usage: 'Start playback. Invokee must be in a voice channel.',
+    execute: async function (target: Discord.Message, args: string[]) {
+      if (target.channel!.type !== 'text') return;
 
-const botCommand: DiscordBotCommand = {
-  name: 'youtube',
-  description: `Play & record Youtube audio`,
-  usage,
-  aliases: ['yt'],
-  cooldown: 5,
-  args: true,
-  categories: ['Fun'],
-  execute: (message: Discord.Message, args: string[]) => {
-    if (message.channel.type !== 'text') return;
+      const track = args[0];
 
-    if (!args.length) {
-      message.reply('This command requires a subcommand. See help for details.');
-      return;
-    }
-
-    const voiceChannel = message.member!.voice.channel;
-
-    const play = async (track: string) => {
+      const voiceChannel = target.member!.voice.channel;
       if (!voiceChannel) {
-        error('Please join a voice channel first!');
+        target.channel.send('Please join a voice channel first!');
         return;
       }
 
@@ -44,7 +29,7 @@ const botCommand: DiscordBotCommand = {
             const dispatcher = connection.play(stream);
 
             dispatcher.on('start', () => {
-              message.client.user?.setActivity(yt.nowPlaying.title, {
+              target.client.user?.setActivity(yt.nowPlaying.title, {
                 type: 'LISTENING',
                 url: yt.nowPlaying.url,
               });
@@ -56,32 +41,31 @@ const botCommand: DiscordBotCommand = {
           });
         });
       } else {
-        error('No valid video found for that request.');
+        target.channel.send('No valid video found for that request.');
       }
-    };
-
-    const stop = () => {
-      yt.playing = false;
-      message.client.user?.setActivity('', {});
-      if (voiceChannel) voiceChannel.leave();
-    };
-
-    const error = (error: string) => {
-      message.channel.send(error);
-    };
-
-    switch (args[0]) {
-      case 'play':
-        play(args[1]);
-        break;
-      case 'stop':
-        stop();
-        break;
-      default:
-        error('Sub-command is incorrect or not yet implemented.');
-        break;
-    }
+    },
   },
+  {
+    name: 'stop',
+    usage: 'Stop playback.',
+    execute: async function (target: Discord.Message) {
+      const voiceChannel = target.member!.voice.channel;
+      yt.playing = false;
+      target.client.user?.setActivity('', {});
+      if (voiceChannel) voiceChannel.leave();
+    },
+  },
+];
+
+const botCommand: DiscordBotCommand = {
+  name: 'youtube',
+  description: `Play & record Youtube audio`,
+  usage: botUtils.generateCommandUsageString(subcommands),
+  aliases: ['yt'],
+  args: true,
+  categories: ['Fun'],
+  subcommands,
+  execute: botUtils.commandModuleExecutor(subcommands),
 };
 
 export = botCommand;

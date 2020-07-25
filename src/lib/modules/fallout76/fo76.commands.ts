@@ -51,8 +51,18 @@ const subcommands = [
       botUtils.renderMessage(target, embed);
     },
   },
+  {
+    name: 'map',
+    usage: 'Display treasure maps',
+    execute: async function (_target: DiscordTarget, args: string[]) {
+      console.log(args);
+    },
+  },
 ];
 
+/**
+ * Sets up the primary bot command
+ */
 const botCommand: DiscordBotCommand = {
   name: 'fallout76',
   description: `Fallout 76 Commands`,
@@ -61,24 +71,7 @@ const botCommand: DiscordBotCommand = {
   args: true,
   categories: ['Info'],
   subcommands,
-  execute: async (message: Discord.Message, args: string[]): Promise<void> => {
-    if (!args.length) {
-      message.reply(
-        'That command requires a subcommand. Use `!help` on this command for available subcommands.',
-      );
-      return;
-    }
-
-    const invokeSubCommand = subcommands.filter(subcommand => {
-      return subcommand.name === args[0];
-    });
-
-    if (invokeSubCommand.length) {
-      invokeSubCommand[0].execute(message);
-    } else {
-      message.channel.send(`Sub command \`${args[0]}\` was not found, or is not yet implemented`);
-    }
-  },
+  execute: botUtils.commandModuleExecutor(subcommands),
 };
 
 export = botCommand;

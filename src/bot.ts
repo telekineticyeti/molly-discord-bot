@@ -1,8 +1,10 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
 import {BotUtils} from './lib/classes/utlities.class';
+import {ScheduleClass} from './lib/modules/scheduler/schedule.class';
 
 const botUtils = new BotUtils(__dirname);
+const scheduleClass = new ScheduleClass();
 
 dotenv.config();
 
@@ -49,7 +51,7 @@ bot.commands = new Discord.Collection();
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
-  botUtils.setupScheduledTasks(bot);
+  scheduleClass.setupScheduledTasks(bot);
 });
 
 bot.on('message', message => {

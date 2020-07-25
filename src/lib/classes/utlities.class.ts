@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import * as cron from 'node-cron';
 import fetch from 'node-fetch';
 import {DiscordSubCommand} from 'typings/discord.js';
 import {MessageAttachment, Message, Channel, MessageEmbed, Client} from 'discord.js';
@@ -134,69 +133,29 @@ export class BotUtils {
     return subCommand[0];
   }
 
-  /**
-   * Reads the scheduled tasks file and sets up each defined task.
-   * TODO: Move this to it's own class file.
-   * @param client The client (bot) instance.
-   */
-  public async setupScheduledTasks(client: Client) {
-    const scheduler = await import('../modules/scheduler/schedule');
-    let taskExecutor: () => void;
-
-    scheduler.forEach(scheduledTaskObj => {
-      try {
-        if (scheduledTaskObj.execute) {
-          /**
-           * If the schedule object defines an executable function,
-           * use this as scheduled action.
-           */
-          taskExecutor = scheduledTaskObj.execute!(client);
-        } else if (scheduledTaskObj.command) {
-          /**
-           * If the schedule object defines a command object,
-           * use this as scheduled action.
-           */
-          const clientCommand = client.commands?.get(scheduledTaskObj.command.module);
-
-          if (clientCommand) {
-            /**
-             * Resolve the target for the scheduled task output (channel or user?)
-             * TODO: Add support for user as target: `Client.fetchUser(id)`
-             */
-            let target: Channel | undefined;
-
-            if (scheduledTaskObj.targetChannel) {
-              if (client.channels.cache.get(scheduledTaskObj.targetChannel)) {
-                target = client.channels.cache.get(scheduledTaskObj.targetChannel);
-              }
-            }
-
-            if (!target) return;
-
-            if (!scheduledTaskObj.command.subcommand) {
-              // Execute the primary command when no subcommand is specified
-              taskExecutor = () => clientCommand.execute(target!);
-            } else {
-              // Executes the subcommand of the primary command module
-              const subcommand = clientCommand.subcommands?.filter(
-                subcom => subcom.name === scheduledTaskObj.command!.subcommand,
-              )[0];
-
-              if (!subcommand) return;
-
-              taskExecutor = () => subcommand.execute(target!);
-            }
-          }
-        } else {
-          console.error('No valid task specified for this schedule', scheduledTaskObj);
-          return;
-        }
-        cron.schedule(scheduledTaskObj.cronTime, taskExecutor);
-        console.log(`Scheduled task: ${scheduledTaskObj.name} (${scheduledTaskObj.cronTime})`);
-      } catch (e) {
-        console.error(`Schedule task FAILED: ${scheduledTaskObj.name}: ${e}`);
+  public commandModuleExecutor(subcommands: DiscordSubCommand[]) {
+    const execute = (message: Message, args: string[]) => {
+      if (!args.length) {
+        message.reply(
+          'That command requires a subcommand. Use `!help` on this command for available subcommands.',
+        );
+        return;
       }
-    });
+
+      const invokeSubCommand = subcommands.filter(subcommand => {
+        return subcommand.name === args[0];
+      });
+
+      if (invokeSubCommand.length) {
+        const subcommandArgs = args;
+        subcommandArgs.shift();
+        invokeSubCommand[0].execute(message, subcommandArgs);
+      } else {
+        message.channel.send(`Sub command \`${args[0]}\` was not found, or is not yet implemented`);
+      }
+    };
+
+    return execute;
   }
 }
 
