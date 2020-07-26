@@ -1,7 +1,54 @@
 import * as cron from 'node-cron';
-import {Channel, Client} from 'discord.js';
+import * as events from 'events';
+import {Channel, Client, Message} from 'discord.js';
 
 export class ScheduleClass {
+  public listeners: IListener[] = [];
+  public dispatcher = new events.EventEmitter();
+
+  constructor() {
+    // TODO
+    // SetInterval Cleanup
+  }
+
+  public registerListener(item: IListener): void {
+    this.listeners.push(item);
+  }
+
+  public unregisterListener(item: IListener): void {
+    let index = -1;
+    this.listeners.some((listener, idx) => {
+      if (JSON.stringify(listener) === JSON.stringify(item)) {
+        index = idx;
+        return true;
+      }
+      return;
+    });
+
+    if (index >= 0) {
+      this.listeners.splice(index, 1);
+    }
+  }
+
+  public listenerCleanup(): void {}
+
+  public listenerDispatch(listener: IListener, message: string): void {
+    this.dispatcher.emit(listener.userId, message);
+  }
+
+  public checkListeners(message: Message): void {
+    const listener = this.listeners.find(item => {
+      const triggerIndex = item.triggers.indexOf(message.content);
+      if (triggerIndex > -1 && item.userId === message.author.id) {
+        return item;
+      }
+      return;
+    });
+    if (listener) {
+      this.listenerDispatch(listener, message.content);
+    }
+  }
+
   /**
    * Reads the scheduled tasks file and sets up each defined task.
    * @param client The client (bot) instance.
@@ -66,3 +113,15 @@ export class ScheduleClass {
     });
   }
 }
+
+export interface IListener {
+  // id: number;
+  triggers: string[];
+  userId: string;
+  metadata?: any;
+  // expiry: number;
+}
+
+const exp = new ScheduleClass();
+
+module.exports = exp;

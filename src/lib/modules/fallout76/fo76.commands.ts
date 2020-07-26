@@ -2,7 +2,10 @@ import * as Discord from 'discord.js';
 import {Fo76} from './fo76.class';
 import {DiscordBotCommand} from 'typings/discord.js';
 import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
+import {Message} from 'discord.js';
+import {ScheduleClass} from '../scheduler/schedule.class';
 
+const scheduleClass: ScheduleClass = require('../scheduler/schedule.class');
 const fo76 = new Fo76();
 const botUtils = new BotUtils(__dirname);
 
@@ -54,8 +57,58 @@ const subcommands = [
   {
     name: 'map',
     usage: 'Display treasure maps',
-    execute: async function (_target: DiscordTarget, args: string[]) {
-      console.log(args);
+    execute: async function (target: Message, _args: string[]) {
+      /**
+       * TODO
+       * Modularise these methods
+       *
+       * - Get Options
+       * - Create Options Set
+       * - Prompt for Options
+       * - Process Chosen Option
+       */
+      const userId = target.author.id;
+
+      const options = ['Cranberry Bog', 'The Forest', 'The Savage Divide'];
+
+      let triggers: string[] = [];
+      let str = '```';
+
+      const makeOpts = () => {
+        let triggerCount = 1;
+
+        options.forEach(opt => {
+          triggers.push(`${triggerCount}`);
+          str += `${triggerCount} - ${opt}\n`;
+          triggerCount++;
+        });
+
+        // return [{1: aaaaaa, 2: bbbbbbb, 3: ccccccc}];
+      };
+
+      makeOpts();
+      str += '```';
+
+      const handler = (opt: string) => {
+        const choice = options[parseInt(opt) - 1];
+        target.channel.send(`You selected ${opt} (${choice})`);
+        scheduleClass.dispatcher.removeListener(userId, handler);
+        scheduleClass.unregisterListener({triggers, userId});
+
+        setTimeout(() => {
+          console.log(scheduleClass.listeners);
+        }, 2000);
+      };
+
+      scheduleClass.registerListener({triggers, userId});
+      scheduleClass.dispatcher.on(userId, handler);
+
+      const embed = new Discord.MessageEmbed()
+        .setColor('#0000ff')
+        .setTitle(`Treasure Maps`)
+        .addField('Select One of the following', str);
+
+      botUtils.renderMessage(target, embed);
     },
   },
 ];

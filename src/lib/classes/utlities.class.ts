@@ -67,8 +67,8 @@ export class BotUtils {
   public randomItemFromArray = randomItemFromArray;
   public generateCommandUsageString = generateCommandUsageString;
 
-  private instanceOfMessage = (obj: any) => 'channel' in obj;
-  private instanceOfChannel = (obj: any) => 'send' in obj;
+  public instanceOfMessage = (obj: any) => 'channel' in obj;
+  public instanceOfChannel = (obj: any) => 'send' in obj;
 
   /**
    *

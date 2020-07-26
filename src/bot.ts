@@ -2,9 +2,8 @@ import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
 import {BotUtils} from './lib/classes/utlities.class';
 import {ScheduleClass} from './lib/modules/scheduler/schedule.class';
-
+const scheduleClass: ScheduleClass = require('./lib/modules/scheduler/schedule.class');
 const botUtils = new BotUtils(__dirname);
-const scheduleClass = new ScheduleClass();
 
 dotenv.config();
 
@@ -55,6 +54,8 @@ bot.on('ready', () => {
 });
 
 bot.on('message', message => {
+  scheduleClass.checkListeners(message);
+
   if (!message.content.startsWith(env.prefix) || message.author.bot) return;
 
   const args = message.content.slice(env.prefix.length).split(/ +/);
@@ -72,7 +73,7 @@ bot.on('message', message => {
     command.execute(message, args);
   } catch (error) {
     console.error(error);
-    message.reply('Bweee wooo <:sadMoops:728756268474302536>');
+    message.reply('`Bweee wooo :(`');
   }
 });
 
