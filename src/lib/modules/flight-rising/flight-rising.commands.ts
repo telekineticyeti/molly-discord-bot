@@ -123,6 +123,9 @@ const subcommands = [
   }
 ];
 
+/**
+ * Sets up the primary bot command
+ */
 const botCommand: DiscordBotCommand = {
   name: 'flightrising',
   description: `Flight Rising commands`,
@@ -131,24 +134,7 @@ const botCommand: DiscordBotCommand = {
   args: true,
   categories: ['Info'],
   subcommands,
-  execute: async (message: Discord.Message, args: string[]): Promise<void> => {
-    if (!args.length) {
-      message.reply(
-        'That command requires a subcommand. Use `!help` on this command for available subcommands.',
-      );
-      return;
-    }
-
-    const invokeSubCommand = subcommands.filter(subcommand => {
-      return subcommand.name === args[0];
-    });
-
-    if (invokeSubCommand.length) {
-      invokeSubCommand[0].execute(message);
-    } else {
-      message.channel.send(`Sub command \`${args[0]}\` was not found, or is not yet implemented`);
-    }
-  },
+  execute: botUtils.commandModuleExecutor(subcommands),
 };
 
 export = botCommand;
