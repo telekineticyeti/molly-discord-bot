@@ -12,16 +12,27 @@ dotenv.config();
  */
 let env: EnvironmentInfo = {
   mode: 'Development',
-  commandsFolder: './src',
+  baseFolder: './src',
   // TODO: on prod this regex is not working for some reason.
   commandFileRegex: /(commands?)\.(js|ts)$/,
+  commandModuleFolders: [],
   token: process.env.TOKEN!,
   prefix: process.env.PREFIX || '!',
 };
 
+/**
+ * Sets the environment to production or development (default). The biggest difference this
+ * makes is to wether core modules are loaded from `./src` or `./dist`.
+ */
 if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
-  env = {...env, mode: 'Production', commandsFolder: './dist', commandFileRegex: /\.(js)$/};
+  env = {...env, mode: 'Production', baseFolder: './dist', commandFileRegex: /\.(js)$/};
 }
+
+/**
+ * Setup references to additional folders where the bot will look for command modules.
+ */
+env.commandModuleFolders =
+  process.env.MODULEDIRS?.split(',').map(m => `${env.baseFolder}/${m}`) || [];
 
 /**
  * Create the bot client
@@ -33,17 +44,40 @@ bot.commands = new Discord.Collection();
  * Import bot command files
  */
 (async () => {
-  const commandFiles = botUtils
-    .walkFiles(`${env.commandsFolder}/lib/modules`)
-    .filter(file => file.match(env.commandFileRegex));
+  /**
+   * Resolve command module files for each given path.
+   * @param paths array of path strings
+   */
+  const resolveCommandModuleFiles = (paths: string[]) => {
+    let files: string[] = [];
 
-  for (let file of commandFiles) {
-    file = file.replace(env.commandsFolder, './');
+    paths.map(path => {
+      try {
+        files = [
+          ...files,
+          ...botUtils.walkFiles(path).filter(file => file.match(env.commandFileRegex)),
+        ];
+      } catch (error) {
+        console.warn(`Could not resolve module path ${path}\n`, error);
+      }
+    });
 
-    const command = await import(file);
-    if (command.name) {
-      bot.commands!.set(command.name, command);
-      console.info(`Command Module Loaded: ${command.name}`);
+    return files;
+  };
+
+  const commandModuleFiles = [...resolveCommandModuleFiles(env.commandModuleFolders)];
+
+  for (let file of commandModuleFiles) {
+    file = file.replace(env.baseFolder, '.');
+
+    try {
+      const command = await import(file);
+      if (command.name) {
+        bot.commands!.set(command.name, command);
+        console.info(`Command Module Loaded: ${command.name}`);
+      }
+    } catch (error) {
+      console.warn(`Could not resolve module ${file}\n`, error);
     }
   }
 })();
@@ -81,8 +115,9 @@ bot.login(env.token);
 
 interface EnvironmentInfo {
   mode: string;
-  commandsFolder: string;
+  baseFolder: string;
   commandFileRegex: RegExp;
   token: string;
   prefix: string;
+  commandModuleFolders: string[];
 }

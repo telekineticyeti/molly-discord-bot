@@ -4,6 +4,8 @@ import * as moment from 'moment';
 
 export class FlightRising {
   public readonly baseUrl = 'https://www1.flightrising.com';
+  public readonly fallbackImage = 'https://flightrising.com/images/layout/logo.png';
+  public readonly embedColour = '#731d08';
 
   public async getPage(url: string): Promise<string> {
     const response = await fetch(url);
@@ -33,8 +35,10 @@ export class FlightRising {
     const time = this.parseTime($('.time.common-tooltip').text());
     const userCount = this.parseUserCount($('.users-online .online').text());
     const exaltBonuses = this.parseExaltBonuses($('#bonus-ticker .bonus-text'));
+    const news = this.parseNews($('#home-content .announcement'));
+    const updates = this.parseUpdates($('#status-box #status-box-mid .status-row'));
 
-    return {randomDragon, time, userCount, exaltBonuses};
+    return { randomDragon, time, userCount, exaltBonuses, news, updates };
   }
 
   public async getDominancePage() {
@@ -46,7 +50,7 @@ export class FlightRising {
     const dominatingFlag = $('#domflag img')[0].attribs.src;
     const timeUntilNextTally = this.parseTimeUntilNextTally($('.kkcount-down10')[0].attribs.time);
 
-    return {currentlyDominating, domPositions, timeUntilNextTally, dominatingFlag};
+    return { currentlyDominating, domPositions, timeUntilNextTally, dominatingFlag };
   }
 
   private parseDomList(domPositions: Cheerio) {
@@ -65,6 +69,45 @@ export class FlightRising {
     });
 
     return flights;
+  }
+
+  private parseNews(announcements: Cheerio): IFrNews[] {
+    const $ = cheerio;
+    const news: IFrNews[] = [];
+
+    announcements.each((_idx, ele) => {
+      const image = $(ele).children('.announce-text').find('.bbcode_center:nth-child(1) > a > img').attr('src');
+      const item = {
+        title: $(ele).find('.screen-reader').text().trim(),
+        body: $(ele).children().not('.screen-reader, .bbcode_center, .announce-footer').text().trim(),
+        link: $(ele).find('.screen-reader > a').attr('href'),
+        imageUrl: image ? image : this.fallbackImage
+      }
+      news.push(item)
+    })
+
+    return news;
+  }
+
+  private parseUpdates(rawUpdates: Cheerio): IFrUpdate[] {
+    const $ = cheerio;
+    const updates: IFrUpdate[] = [];
+
+    rawUpdates.each((_idx, ele) => {
+      const avatar = $(ele).find('img.mini-avatar').attr('src');
+      const link = $(ele).find('.status-row-text a:nth-child(1)').attr('href');
+      const item = {
+        author: $(ele).find('.status-author a').text().trim(),
+        avatarUrl: avatar ? `${this.baseUrl}${avatar}` : this.fallbackImage,
+        body: $(ele).find('.status-row-text').text().trim(),
+        date: $(ele).find('.status-author span').text().trim(),
+        link: link ? link : 'https://www1.flightrising.com/site/dev-tracker',
+      }
+
+      updates.push(item);
+    });
+
+    return updates;
   }
 
   private parseTimeUntilNextTally(time: string) {
@@ -89,7 +132,7 @@ export class FlightRising {
       const name = bonus[0].trim().split(' ')[1];
       const amount = parseInt(bonus[1]);
 
-      bonuses.push({name, type, amount});
+      bonuses.push({ name, type, amount });
     });
 
     bonuses.sort((a, b) => {
@@ -152,4 +195,19 @@ export interface IRandomDragon {
   clan: string;
   name: string;
   level: string;
+}
+
+interface IFrNews {
+  title: string;
+  body: string;
+  link?: string;
+  imageUrl: string;
+}
+
+interface IFrUpdate {
+  author: string;
+  avatarUrl: string;
+  body: string;
+  date: string;
+  link: string;
 }

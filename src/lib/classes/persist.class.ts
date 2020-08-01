@@ -6,7 +6,7 @@ export class PersistClass {
   }
 
   private async init() {
-    await storage.init({dir: './persist'});
+    await storage.init({ dir: './persist' });
   }
 
   /**
@@ -23,13 +23,10 @@ export class PersistClass {
     // No item with that key exists, create it and return the item.
     if (!storedItem) {
       await storage.setItem(storageKey, providedItem);
-      console.log('no stored item found');
       return;
     } else {
-      console.log('stored item found');
       // Provided item does not match stored item. Update stored item and return.
       if (JSON.stringify(storedItem) !== JSON.stringify(providedItem)) {
-        console.log('updating stored item');
         await storage.setItem(storageKey, providedItem);
       }
       return storedItem;

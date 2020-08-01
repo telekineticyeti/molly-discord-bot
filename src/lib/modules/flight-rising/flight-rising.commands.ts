@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
-import {FlightRising} from './fllght-rising.class';
-import {DiscordBotCommand} from 'typings/discord.js';
-import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
+import { FlightRising } from './fllght-rising.class';
+import { DiscordBotCommand } from 'typings/discord.js';
+import { BotUtils, DiscordTarget } from '../../classes/utlities.class';
 
 const fr = new FlightRising();
 const botUtils = new BotUtils(__dirname);
@@ -87,6 +87,40 @@ const subcommands = [
       botUtils.renderMessage(target, embed);
     },
   },
+  {
+    name: 'news',
+    usage: 'Display latest news post',
+    execute: async function (target: DiscordTarget) {
+      const news = (await fr.getFrontPage()).news[0];
+      const imageName = `news_${news.title}.png`;
+      const attachment = await botUtils.attachmentFromUrl(news.imageUrl, imageName);
+      const embed = new Discord.MessageEmbed()
+        .setColor(fr.embedColour)
+        .setTitle(news.title)
+        .setDescription(news.body)
+        .setURL(news.link || fr.baseUrl)
+        .attachFiles([attachment])
+        .setThumbnail(`attachment://${imageName}`)
+
+      botUtils.renderMessage(target, embed);
+    }
+  },
+  {
+    name: 'updates',
+    usage: 'Display latest update',
+    execute: async function (target: DiscordTarget) {
+      const update = (await fr.getFrontPage()).updates[0];
+      const attachment = await botUtils.attachmentFromUrl(update.avatarUrl, 'update.png');
+      const embed = new Discord.MessageEmbed()
+        .setColor(fr.embedColour)
+        .setTitle(update.body)
+        .setURL(update.link)
+        .attachFiles([attachment])
+        .setFooter(`Update posted by ${update.author} on ${update.date}`, `attachment://update.png`)
+
+      botUtils.renderMessage(target, embed);
+    }
+  }
 ];
 
 /**
