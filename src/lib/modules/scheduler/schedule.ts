@@ -13,7 +13,7 @@ const fr = new FlightRising();
 const scheduler: ScheduleConfig[] = [
   {
     name: 'Flight Rising Daily Exalt Bonuses',
-    cronTime: '15 8 * * *',
+    cronTime: '15 9 * * *',
     targetChannel: channelDropPod,
     command: { module: 'flightrising', subcommand: 'bonus' },
   },
