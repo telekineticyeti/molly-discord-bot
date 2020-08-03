@@ -1,8 +1,8 @@
-import { ScheduleConfig } from 'typings/discord.js';
-import { Fo76 } from '../fallout76/fo76.class';
-import { FlightRising } from '../flight-rising/fllght-rising.class';
-import { PersistClass } from '../../classes/persist.class';
-import { BotUtils } from '../../classes/utlities.class';
+import {ScheduleConfig} from 'typings/discord.js';
+import {Fo76} from '../fallout76/fo76.class';
+import {FlightRising} from '../flight-rising/fllght-rising.class';
+import {PersistClass} from '../../classes/persist.class';
+import {BotUtils} from '../../classes/utlities.class';
 
 const channelDropPod = '732370971104641024';
 const botUtils = new BotUtils(__dirname);
@@ -13,9 +13,9 @@ const fr = new FlightRising();
 const scheduler: ScheduleConfig[] = [
   {
     name: 'Flight Rising Daily Exalt Bonuses',
-    cronTime: '15 8 * * *',
+    cronTime: '15 9 * * *',
     targetChannel: channelDropPod,
-    command: { module: 'flightrising', subcommand: 'bonus' },
+    command: {module: 'flightrising', subcommand: 'bonus'},
   },
   {
     name: 'Fallout News Checker',

@@ -55,6 +55,16 @@ const subcommands = [
     },
   },
   {
+    name: 's',
+    usage: '',
+    execute: async function () {
+      fo76.scrapeMaps();
+
+      // console.log(t);
+      // console.log(t.length);
+    },
+  },
+  {
     name: 'map',
     usage: 'Display treasure maps',
     execute: async function (target: Message, _args: string[]) {
@@ -69,7 +79,7 @@ const subcommands = [
        */
       const userId = target.author.id;
 
-      const options = ['Cranberry Bog', 'The Forest', 'The Savage Divide'];
+      const mapRegions = await fo76.scrapeMaps();
 
       let triggers: string[] = [];
       let str = '```';
@@ -77,9 +87,9 @@ const subcommands = [
       const makeOpts = () => {
         let triggerCount = 1;
 
-        options.forEach(opt => {
+        mapRegions.forEach(region => {
           triggers.push(`${triggerCount}`);
-          str += `${triggerCount} - ${opt}\n`;
+          str += `${triggerCount} - ${region.name}\n`;
           triggerCount++;
         });
 
@@ -90,8 +100,8 @@ const subcommands = [
       str += '```';
 
       const handler = (opt: string) => {
-        const choice = options[parseInt(opt) - 1];
-        target.channel.send(`You selected ${opt} (${choice})`);
+        const choice = mapRegions[parseInt(opt) - 1];
+        target.channel.send(`You selected ${opt} (${choice.name})`);
         scheduleClass.dispatcher.removeListener(userId, handler);
         scheduleClass.unregisterListener({triggers, userId});
 
