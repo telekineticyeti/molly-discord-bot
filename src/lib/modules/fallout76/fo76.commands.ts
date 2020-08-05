@@ -2,6 +2,7 @@ import * as Discord from 'discord.js';
 import {Fo76} from './fo76.class';
 import {DiscordBotCommand} from 'typings/discord.js';
 import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
+import * as moment from 'moment';
 
 const fo76 = new Fo76();
 const botUtils = new BotUtils(__dirname);
@@ -56,6 +57,34 @@ const subcommands = [
     usage: 'Display treasure maps',
     execute: async function (_target: DiscordTarget, args: string[]) {
       console.log(args);
+    },
+  },
+  {
+    name: 'status',
+    usage: 'Show Fallout 76 Server Status',
+    execute: async function (target: DiscordTarget) {
+      const status = await fo76.getStatus();
+      if (!status) return;
+      const description = status.message ? status.message : 'Fallout 76 is online.';
+      const timeUpdated = moment(status.updatedTime).local().format('LLLL');
+      const timeStarted = moment(status.startTime).local().format('LLLL');
+
+      const footer = () => {
+        let fstr = '';
+        if (status.message) fstr += `Started ${timeStarted}`;
+        fstr += ` ☢️ Updated ${timeUpdated}`;
+        return fstr;
+      };
+
+      const embed = new Discord.MessageEmbed()
+        .setColor('#0000ff')
+        .setTitle(`Fallout 76 Sevice Status`)
+        .setDescription(description)
+        .setFooter(footer());
+
+      if (status.url) embed.setURL(status.url);
+
+      botUtils.renderMessage(target, embed);
     },
   },
 ];

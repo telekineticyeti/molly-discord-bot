@@ -6,6 +6,7 @@ export class Fo76 {
   private readonly bethesdaBaseUrl = 'https://fallout.bethesda.net';
   private readonly bethesdaNewsApiUrl =
     this.bethesdaBaseUrl + '/api/v1/components/news?games=&exclude=&offset=0-0&lang=en';
+  private readonly bethesdaStatusUrl = 'https://bethesda.net/en/status/api/statuses';
   private readonly urlNukeCodes = 'https://nukacrypt.com/';
 
   public async getNuclearCodes(): Promise<INuclearCodes> {
@@ -53,6 +54,40 @@ export class Fo76 {
 
     return newsArray;
   }
+
+  /**
+   * Query Bethesda site REST API for Fallout 76 Server Status.
+   */
+  public async getStatus(): Promise<IFalloutStatus | undefined> {
+    const response = await fetch(this.bethesdaStatusUrl);
+    const statusJson = await response.json();
+    const falloutStatus = statusJson.components.filter(
+      (comp: any) => comp.name === 'Fallout 76',
+    )[0];
+
+    if (!falloutStatus) return;
+
+    const parsed: IFalloutStatus = {
+      startTime: falloutStatus.created_at,
+      updatedTime: falloutStatus.updated_at,
+      status: falloutStatus.status,
+    };
+
+    if (parsed.status !== 'operational') {
+      const incident = statusJson.incidents.filter((i: any) =>
+        i.name.toLowerCase().includes('fallout 76'),
+      )[0];
+
+      if (incident) {
+        parsed.startTime = incident.started_at;
+        parsed.updatedTime = incident.updated_at;
+        parsed.url = incident.shortlink;
+        parsed.message = incident.incident_updates[0].body;
+      }
+    }
+
+    return parsed;
+  }
 }
 
 export interface INuclearCodes {
@@ -71,4 +106,12 @@ export interface IFalloutNews {
   imageUrl: string;
   newsUrl: string;
   date: string;
+}
+
+export interface IFalloutStatus {
+  startTime: string;
+  updatedTime: string;
+  status: string;
+  message?: string;
+  url?: string;
 }
