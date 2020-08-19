@@ -66,6 +66,7 @@ export class BotUtils {
   public attachmentFromUrl = attachmentFromUrl;
   public randomItemFromArray = randomItemFromArray;
   public generateCommandUsageString = generateCommandUsageString;
+  public env: EnvironmentInfo;
 
   private instanceOfMessage = (obj: any) => 'channel' in obj;
   private instanceOfChannel = (obj: any) => 'send' in obj;
@@ -160,3 +161,12 @@ export class BotUtils {
 }
 
 export type DiscordTarget = Message | Channel;
+
+interface EnvironmentInfo {
+  mode: 'Development' | 'Production';
+  baseFolder: string;
+  commandFileRegex: RegExp;
+  token: string;
+  prefix: string;
+  commandModuleFolders: string[];
+}

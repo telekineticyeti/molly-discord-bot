@@ -6,7 +6,7 @@ export class PersistClass {
   }
 
   private async init() {
-    await storage.init({ dir: './persist' });
+    await storage.init({dir: './persist'});
   }
 
   /**
@@ -38,7 +38,7 @@ export class PersistClass {
     return;
   }
 
-  public async get(key: string): Promise<unknown | undefined> {
+  public async get<T>(key: string): Promise<T | undefined> {
     const item = await storage.getItem(key);
     if (item) return item;
     return;

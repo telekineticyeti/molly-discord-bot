@@ -11,7 +11,7 @@ dotenv.config();
 /**
  * Set up environment info and bot configuration
  */
-let env: EnvironmentInfo = {
+botUtils.env = {
   mode: 'Development',
   baseFolder: './src',
   // TODO: on prod this regex is not working for some reason.
@@ -26,14 +26,19 @@ let env: EnvironmentInfo = {
  * makes is to wether core modules are loaded from `./src` or `./dist`.
  */
 if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
-  env = {...env, mode: 'Production', baseFolder: './dist', commandFileRegex: /\.(js)$/};
+  botUtils.env = {
+    ...botUtils.env,
+    mode: 'Production',
+    baseFolder: './dist',
+    commandFileRegex: /\.(js)$/,
+  };
 }
 
 /**
  * Setup references to additional folders where the bot will look for command modules.
  */
-env.commandModuleFolders =
-  process.env.MODULEDIRS?.split(',').map(m => `${env.baseFolder}/${m}`) || [];
+botUtils.env.commandModuleFolders =
+  process.env.MODULEDIRS?.split(',').map(m => `${botUtils.env.baseFolder}/${m}`) || [];
 
 /**
  * Create the bot client
@@ -56,7 +61,7 @@ bot.commands = new Discord.Collection();
       try {
         files = [
           ...files,
-          ...botUtils.walkFiles(path).filter(file => file.match(env.commandFileRegex)),
+          ...botUtils.walkFiles(path).filter(file => file.match(botUtils.env.commandFileRegex)),
         ];
       } catch (error) {
         console.warn(`Could not resolve module path ${path}\n`, error);
@@ -66,10 +71,10 @@ bot.commands = new Discord.Collection();
     return files;
   };
 
-  const commandModuleFiles = [...resolveCommandModuleFiles(env.commandModuleFolders)];
+  const commandModuleFiles = [...resolveCommandModuleFiles(botUtils.env.commandModuleFolders)];
 
   for (let file of commandModuleFiles) {
-    file = file.replace(env.baseFolder, '.');
+    file = file.replace(botUtils.env.baseFolder, '.');
 
     try {
       const command = await import(file);
@@ -84,14 +89,20 @@ bot.commands = new Discord.Collection();
 })();
 
 bot.on('ready', () => {
-  console.info(`Logged in as ${bot.user!.tag} in ${env.mode} mode!`);
+  console.info(`Logged in as ${bot.user!.tag} in ${botUtils.env.mode} mode!`);
   scheduleClass.setupScheduledTasks(bot);
+
+  if (botUtils.env.mode === 'Development') {
+    bot.user?.setActivity('🛠️ In Development Mode');
+  } else {
+    bot.user?.setActivity('');
+  }
 });
 
 bot.on('message', message => {
-  if (!message.content.startsWith(env.prefix) || message.author.bot) return;
+  if (!message.content.startsWith(botUtils.env.prefix) || message.author.bot) return;
 
-  const args = message.content.slice(env.prefix.length).split(/ +/);
+  const args = message.content.slice(botUtils.env.prefix.length).split(/ +/);
   const commandName = args.shift()!.toLowerCase();
 
   if (!bot.commands) return;
@@ -110,13 +121,4 @@ bot.on('message', message => {
   }
 });
 
-bot.login(env.token);
-
-interface EnvironmentInfo {
-  mode: string;
-  baseFolder: string;
-  commandFileRegex: RegExp;
-  token: string;
-  prefix: string;
-  commandModuleFolders: string[];
-}
+bot.login(botUtils.env.token);

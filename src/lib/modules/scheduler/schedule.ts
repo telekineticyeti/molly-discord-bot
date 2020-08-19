@@ -4,11 +4,14 @@ import {FlightRising} from '../flight-rising/fllght-rising.class';
 import {PersistClass} from '../../classes/persist.class';
 import {BotUtils} from '../../classes/utlities.class';
 
-const channelDropPod = '732370971104641024';
 const botUtils = new BotUtils(__dirname);
 const persist = new PersistClass();
 const fo76 = new Fo76();
 const fr = new FlightRising();
+const channelDropPod =
+  !botUtils.env || botUtils.env.mode === 'Development'
+    ? '731911474737578015'
+    : '732370971104641024';
 
 const scheduler: ScheduleConfig[] = [
   {
