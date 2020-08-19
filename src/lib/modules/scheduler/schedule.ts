@@ -21,6 +21,12 @@ const scheduler: ScheduleConfig[] = [
     command: {module: 'flightrising', subcommand: 'bonus'},
   },
   {
+    name: 'Scraper check',
+    cronTime: '15/* * * * *',
+    targetChannel: channelDropPod,
+    command: {module: 'scrape', subcommand: 'check'},
+  },
+  {
     name: 'Fallout News Checker',
     cronTime: '*/30 * * * *',
     execute: client => {
