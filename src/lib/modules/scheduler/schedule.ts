@@ -23,7 +23,7 @@ const scheduler: ScheduleConfig[] = [
   {
     name: 'Scraper check',
     cronTime: '15/* * * * *',
-    targetChannel: channelDropPod,
+    targetChannel: '745765996337299517',
     command: {module: 'scrape', subcommand: 'check'},
   },
   {
