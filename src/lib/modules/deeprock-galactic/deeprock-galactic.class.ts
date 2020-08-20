@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
 import * as moment from 'moment';
-import {BotUtils} from '../../classes/utlities.class';
+
+const botUtils = require('../../classes/utlities.class');
 
 export class DeepRockBotCommands {
-  private botUtils = new BotUtils(__dirname);
   public vaQuotes: string[] = [
     `THEY'RE COMIN' OUTTA THE KARL-DAMNED WALLS! 🦟`,
     `Hello Darkness My Old Friend, Hahaha!`,
@@ -65,13 +65,15 @@ export class DeepRockBotCommands {
       return moment(now).fromNow();
     };
 
-    const thumbnail = await this.botUtils.attachmentFromFile(
-      './assets/images/192px-DeepDive_Icon.png',
+    const thumbnail = await botUtils.attachmentFromFile(
+      __dirname,
+      '/assets/images/192px-DeepDive_Icon.png',
       'thumbnail.png',
     );
 
-    const footer = await this.botUtils.attachmentFromFile(
-      './assets/images/192px-Mining_expedition_icon.png',
+    const footer = await botUtils.attachmentFromFile(
+      __dirname,
+      '/assets/images/192px-Mining_expedition_icon.png',
       'footer.png',
     );
 

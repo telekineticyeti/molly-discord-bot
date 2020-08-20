@@ -1,10 +1,9 @@
 import * as Discord from 'discord.js';
 import {DiscordYoutube} from './youtube.class';
 import {DiscordBotCommand} from 'typings/discord.js';
-import {BotUtils} from '../../classes/utlities.class';
 
 const yt = new DiscordYoutube();
-const botUtils = new BotUtils(__dirname);
+const botUtils = require('../../classes/utlities.class');
 
 const subcommands = [
   {

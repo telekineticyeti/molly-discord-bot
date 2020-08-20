@@ -2,13 +2,12 @@ import {ScheduleConfig} from 'typings/discord.js';
 import {Fo76} from '../fallout76/fo76.class';
 import {FlightRising} from '../flight-rising/fllght-rising.class';
 import {PersistClass} from '../../classes/persist.class';
-import {BotUtils} from '../../classes/utlities.class';
 
-const botUtils = new BotUtils(__dirname);
+const botUtils = require('../../classes/utlities.class');
 const persist = new PersistClass();
 const fo76 = new Fo76();
 const fr = new FlightRising();
-const channelDropPod =
+const targetChannel =
   !botUtils.env || botUtils.env.mode === 'Development'
     ? '731911474737578015'
     : '732370971104641024';
@@ -17,7 +16,7 @@ const scheduler: ScheduleConfig[] = [
   {
     name: 'Flight Rising Daily Exalt Bonuses',
     cronTime: '15 9 * * *',
-    targetChannel: channelDropPod,
+    targetChannel: targetChannel,
     command: {module: 'flightrising', subcommand: 'bonus'},
   },
   {
@@ -34,7 +33,7 @@ const scheduler: ScheduleConfig[] = [
       return async () => {
         const storageKey = 'FalloutNews';
         const output = () => {
-          const channel = client.channels.cache.get(channelDropPod);
+          const channel = client.channels.cache.get(targetChannel);
           if (!channel) return;
 
           const command = botUtils.resolveCommand(client, 'fallout76', 'news');
@@ -59,7 +58,7 @@ const scheduler: ScheduleConfig[] = [
       return async () => {
         const storageKey = 'FalloutStatus';
         const output = () => {
-          const channel = client.channels.cache.get(channelDropPod);
+          const channel = client.channels.cache.get(targetChannel);
           if (!channel) return;
 
           const command = botUtils.resolveCommand(client, 'fallout76', 'status');
@@ -83,7 +82,7 @@ const scheduler: ScheduleConfig[] = [
       return async () => {
         const storageKey = 'FlightRisingNews';
         const output = () => {
-          const channel = client.channels.cache.get(channelDropPod);
+          const channel = client.channels.cache.get(targetChannel);
           if (!channel) return;
 
           const command = botUtils.resolveCommand(client, 'flightrising', 'news');
@@ -108,7 +107,7 @@ const scheduler: ScheduleConfig[] = [
       return async () => {
         const storageKey = 'FlightRisingUpdates';
         const output = () => {
-          const channel = client.channels.cache.get(channelDropPod);
+          const channel = client.channels.cache.get(targetChannel);
           if (!channel) return;
 
           const command = botUtils.resolveCommand(client, 'flightrising', 'updates');

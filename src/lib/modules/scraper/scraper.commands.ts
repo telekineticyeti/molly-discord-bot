@@ -1,10 +1,10 @@
 import * as Discord from 'discord.js';
-import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
+import {DiscordTarget} from '../../classes/utlities.class';
 import {DiscordBotCommand} from 'typings/discord.js';
 import {Scraper} from './scraper.class';
 
-const botUtils = new BotUtils(__dirname);
 const scraper = new Scraper();
+const botUtils = require('../../classes/utlities.class');
 
 const subcommands = [
   {

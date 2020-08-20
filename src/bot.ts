@@ -1,9 +1,9 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import {BotUtils} from './lib/classes/utlities.class';
 import {ScheduleClass} from './lib/modules/scheduler/schedule.class';
+import * as path from 'path';
 
-const botUtils = new BotUtils(__dirname);
+const botUtils = require('./lib/classes/utlities.class');
 const scheduleClass = new ScheduleClass();
 
 dotenv.config();
@@ -11,7 +11,8 @@ dotenv.config();
 /**
  * Set up environment info and bot configuration
  */
-botUtils.env = {
+
+botUtils.setEnvironment({
   mode: 'Development',
   baseFolder: './src',
   // TODO: on prod this regex is not working for some reason.
@@ -19,19 +20,19 @@ botUtils.env = {
   commandModuleFolders: [],
   token: process.env.TOKEN!,
   prefix: process.env.PREFIX || '!',
-};
+  botRootPath: path.resolve(__dirname),
+});
 
 /**
  * Sets the environment to production or development (default). The biggest difference this
  * makes is to wether core modules are loaded from `./src` or `./dist`.
  */
 if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('Production') > -1) {
-  botUtils.env = {
-    ...botUtils.env,
+  botUtils.setEnvironment({
     mode: 'Production',
     baseFolder: './dist',
     commandFileRegex: /\.(js)$/,
-  };
+  });
 }
 
 /**
@@ -61,7 +62,9 @@ bot.commands = new Discord.Collection();
       try {
         files = [
           ...files,
-          ...botUtils.walkFiles(path).filter(file => file.match(botUtils.env.commandFileRegex)),
+          ...botUtils
+            .walkFiles(path)
+            .filter((file: any) => file.match(botUtils.env.commandFileRegex)),
         ];
       } catch (error) {
         console.warn(`Could not resolve module path ${path}\n`, error);

@@ -60,8 +60,6 @@ export function generateCommandUsageString(subcommands: DiscordSubCommand[]): st
 }
 
 export class BotUtils {
-  constructor(private modPath: string) {}
-
   public walkFiles = walkFiles;
   public attachmentFromUrl = attachmentFromUrl;
   public randomItemFromArray = randomItemFromArray;
@@ -83,14 +81,16 @@ export class BotUtils {
 
   /**
    * Create a message attachment from a local file.
-   * @param filePath Relative path to the local file to attach.
+   * @param modPath The relative path to the mod location. Usually `__dirname`.
+   * @param filePath Path to the local file, relative to the modPath
    * @param name The name of the attachment
    */
   public async attachmentFromFile(
+    modPath: string,
     filePath: string,
     name = 'attachment',
   ): Promise<MessageAttachment> {
-    const attachmentPath = path.join(this.modPath, filePath);
+    const attachmentPath = path.join(modPath, filePath);
     const asyncReadFile = util.promisify(fs.readFile);
     const data = await asyncReadFile(attachmentPath);
     return new MessageAttachment(data, name);
@@ -158,6 +158,10 @@ export class BotUtils {
 
     return execute;
   }
+
+  public setEnvironment(env: Partial<EnvironmentInfo>): void {
+    this.env = {...this.env, ...env};
+  }
 }
 
 export type DiscordTarget = Message | Channel;
@@ -169,4 +173,12 @@ interface EnvironmentInfo {
   token: string;
   prefix: string;
   commandModuleFolders: string[];
+  botRootPath: string;
 }
+
+/**
+ * Exporting an instance of this class as the default export will allow us
+ * to re-use this class in other files by using require.
+ */
+const botUtils = new BotUtils();
+module.exports = botUtils;

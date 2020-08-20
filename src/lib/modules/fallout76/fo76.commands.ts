@@ -1,11 +1,11 @@
 import * as Discord from 'discord.js';
 import {Fo76} from './fo76.class';
 import {DiscordBotCommand} from 'typings/discord.js';
-import {BotUtils, DiscordTarget} from '../../classes/utlities.class';
+import {DiscordTarget} from '../../classes/utlities.class';
 import * as moment from 'moment';
+const botUtils = require('../../classes/utlities.class');
 
 const fo76 = new Fo76();
-const botUtils = new BotUtils(__dirname);
 
 const subcommands = [
   {
@@ -31,6 +31,7 @@ const subcommands = [
       const codesData = await fo76.getNuclearCodes();
 
       const attachment = await botUtils.attachmentFromFile(
+        __dirname,
         './assets/images/bombrider.png',
         'nukes.png',
       );

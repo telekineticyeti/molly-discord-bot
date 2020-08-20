@@ -1,10 +1,10 @@
 import * as Discord from 'discord.js';
-import { FlightRising } from './fllght-rising.class';
-import { DiscordBotCommand } from 'typings/discord.js';
-import { BotUtils, DiscordTarget } from '../../classes/utlities.class';
+import {FlightRising} from './fllght-rising.class';
+import {DiscordBotCommand} from 'typings/discord.js';
+import {DiscordTarget} from '../../classes/utlities.class';
 
 const fr = new FlightRising();
-const botUtils = new BotUtils(__dirname);
+const botUtils = require('../../classes/utlities.class');
 
 const subcommands = [
   {
@@ -100,10 +100,10 @@ const subcommands = [
         .setDescription(news.body)
         .setURL(news.link || fr.baseUrl)
         .attachFiles([attachment])
-        .setThumbnail(`attachment://${imageName}`)
+        .setThumbnail(`attachment://${imageName}`);
 
       botUtils.renderMessage(target, embed);
-    }
+    },
   },
   {
     name: 'updates',
@@ -116,11 +116,14 @@ const subcommands = [
         .setTitle(update.body)
         .setURL(update.link)
         .attachFiles([attachment])
-        .setFooter(`Update posted by ${update.author} on ${update.date}`, `attachment://update.png`)
+        .setFooter(
+          `Update posted by ${update.author} on ${update.date}`,
+          `attachment://update.png`,
+        );
 
       botUtils.renderMessage(target, embed);
-    }
-  }
+    },
+  },
 ];
 
 /**
