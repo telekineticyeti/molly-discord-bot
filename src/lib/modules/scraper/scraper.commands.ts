@@ -13,7 +13,7 @@ const subcommands = [
     execute: async function (target: DiscordTarget, args: string[]) {
       if (!args) return;
       try {
-        await scraper.add(args[0]);
+        await scraper.add(args[0], args[1]);
         botUtils.renderMessage(
           target,
           `${args[0]} has been added to the scrape scheduler. You will be notified next time that changes are detected.`,
@@ -31,7 +31,7 @@ const subcommands = [
       if (!args) return;
       try {
         await scraper.remove(args[0]);
-        botUtils.renderMessage(target, `${args[0]} has been removed from the scrape scheduler.`);
+        botUtils.renderMessage(target, `Site has been removed from the scrape scheduler.`);
       } catch (error) {
         botUtils.renderMessage(target, 'Failed to remove that site!');
         console.error(error);

@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
 import {crc32} from 'crc';
 import {PersistClass} from '../../classes/persist.class';
 
@@ -7,7 +8,7 @@ const persistApi = new PersistClass();
 export class Scraper {
   private readonly storageKey = 'scraperPersist';
 
-  public createScrapeEntry(url: string, body: string): IScrapeModel {
+  public createScrapeEntry(url: string, body: string, ignoredSelectors: string[]): IScrapeModel {
     const timestamp = new Date().valueOf();
     return {
       url,
@@ -15,6 +16,7 @@ export class Scraper {
       length: body.length,
       lastChecked: timestamp,
       lastChanged: timestamp,
+      ignoredSelectors,
     };
   }
 
@@ -26,12 +28,14 @@ export class Scraper {
     return false;
   }
 
-  public async add(url: string): Promise<void> {
+  public async add(url: string, ignoredSelectors?: string): Promise<void> {
     try {
+      const ignoreList = ignoredSelectors?.split(',') || [];
+
       if (await this.checkScrapeEntries(url)) throw new Error('That entry already exists!');
       const response = await fetch(url);
-      const body = await response.text();
-      const newScrapeEntry = this.createScrapeEntry(url, body);
+      const body = this.htmlFilterSelectors(await response.text(), ignoreList);
+      const newScrapeEntry = this.createScrapeEntry(url, body, ignoreList);
       const existingScrapeEntries = (await persistApi.get<IScrapeModel[]>(this.storageKey)) || [];
       persistApi.set(this.storageKey, [...existingScrapeEntries, newScrapeEntry]);
     } catch (error) {
@@ -60,7 +64,7 @@ export class Scraper {
     for (const item of existingScrapeEntries) {
       try {
         const response = await fetch(item.url);
-        const newBody = await response.text();
+        const newBody = this.htmlFilterSelectors(await response.text(), item.ignoredSelectors);
         const currentTimestamp = new Date().valueOf();
         const newChecksum = crc32(newBody).toString(16);
 
@@ -90,11 +94,18 @@ export class Scraper {
     persistApi.set(this.storageKey, refreshedScrapeEntries);
     return scrapedEntriesWithChanges;
   }
+
   /**
-   * Store initial model
-   *
-   * Run checks on schedule !scrape check
+   * Filters user defined selectors from the scraped html. This can be used to
+   * avoid false negatives that can arise from cache busting attributes or tickers.
+   * @param html the html string to operate on
+   * @param ignoredSelectors user defined list of selectors to ignore
    */
+  public htmlFilterSelectors(html: string, ignoredSelectors: string[]): string {
+    const $ = cheerio.load(html);
+    $(`${ignoredSelectors.join(', ')}`).each((_, e) => $(e).remove());
+    return $.html();
+  }
 }
 
 export interface IScrapeModel {
@@ -104,4 +115,5 @@ export interface IScrapeModel {
   lastChecked: number;
   lastChanged: number;
   changeType?: 'Checksum' | 'Length';
+  ignoredSelectors: string[];
 }
